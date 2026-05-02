@@ -1,8 +1,14 @@
 import { redirect } from "next/navigation";
+import { getAdminSession } from "@/lib/auth/session";
+import { supabaseSelect } from "@/lib/supabase/server";
 
-export async function requireRole(role: "platform_admin" | "owner") {
-  const mockRole = process.env.NEXT_PUBLIC_DEMO_ROLE;
-  if (mockRole !== role) {
-    redirect(role === "platform_admin" ? "/admin/login" : "/owner/login");
-  }
+export async function requirePlatformAdmin() {
+  const userId = await getAdminSession();
+  if (!userId) redirect("/admin/login");
+
+  const profiles = await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&id=eq.${userId}&limit=1`);
+  const profile = profiles[0];
+  if (!profile || profile.role !== "platform_admin" || profile.is_active !== true) redirect("/admin/login");
+
+  return { userId };
 }

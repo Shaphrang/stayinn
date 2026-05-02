@@ -1,0 +1,2 @@
+import { requirePlatformAdmin } from "@/lib/auth/guards";import { getTable } from "@/lib/admin-data";
+export default async function Page(){await requirePlatformAdmin();const rows=await getTable("properties","cover_image_url,name,property_type,status,is_verified,is_featured,created_at,owner_profiles(business_name),states(name),districts(name),locations(name)" );return <div><h1 className='text-2xl font-semibold mb-3'>Properties</h1><pre className='bg-white border rounded p-3 overflow-auto text-xs'>{JSON.stringify(rows,null,2)}</pre></div>}
