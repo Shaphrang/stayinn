@@ -1,9 +1,19 @@
-# admin crud implementation
+# Admin CRUD Implementation
 
-Initial foundation scaffold created for StayInn MVP admin/owner CRUD workflows.
+## Implemented in this iteration
 
-## Notes
-- Added admin and owner route structure.
-- Added shared dashboard shell and status badge base components.
-- Added utility helpers (slugify/csv).
-- Added placeholder Supabase/auth helper abstractions for secure role-based extension.
+- Added server actions for **admin owner management CRUD** in `src/app/admin/(panel)/owners/actions.ts`.
+- Added validation for owner status transitions and owner profile edits.
+- Added owner list filtering and inline forms for status updates/edit/delete on `/admin/owners`.
+- Added shared write helpers in Supabase server module for PATCH/DELETE/POST and kept admin guard checks on every mutation.
+
+## Owner management behavior
+
+- All mutations call `requirePlatformAdmin()` first.
+- Owner status updates support approved/rejected/suspended/pending.
+- Remarks are mandatory for rejected/suspended.
+- Approval/rejection/suspension audit fields are set with current timestamp and current admin id.
+
+## Remaining CRUD modules
+
+Properties, rooms, bookings, locations, and settings currently remain on read-only foundation and are planned for subsequent incremental CRUD passes.
