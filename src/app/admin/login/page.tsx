@@ -3,34 +3,68 @@ import { loginWithPassword } from "@/lib/supabase/client";
 import { supabaseSelect } from "@/lib/supabase/server";
 import { setAdminSession, clearAdminSession } from "@/lib/auth/session";
 
+type PasswordLoginResponse = {
+  access_token?: string;
+  expires_in?: number;
+  user?: {
+    id?: string;
+  };
+};
+
+type AdminProfile = {
+  role: string;
+  is_active: boolean;
+};
+
+function loginErrorUrl(error: string) {
+  return `/admin/login?${new URLSearchParams({ error }).toString()}`;
+}
+
 async function doLogin(formData: FormData) {
   "use server";
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  if (!email || !password) redirect(loginErrorUrl("Email and password are required."));
+
   let res: Response;
   try {
     res = await loginWithPassword(email, password);
   } catch {
-    redirect("/admin/login?error=Login service is temporarily unavailable. Please try again.");
+    redirect(loginErrorUrl("Login service is temporarily unavailable. Please try again."));
   }
-  if (!res.ok) redirect("/admin/login?error=Invalid credentials");
-  const data = await res.json();
-  const userId = data.user?.id as string;
-  await setAdminSession(userId);
-  let p: { role: string; is_active: boolean }[] = [];
+
+  if (!res.ok) redirect(loginErrorUrl("Invalid credentials."));
+
+  let data: PasswordLoginResponse;
   try {
-    const byId = await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&id=eq.${userId}&limit=1`);
-    p = byId.length
-      ? byId
-      : await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&user_id=eq.${userId}&limit=1`);
+    data = await res.json();
+  } catch {
+    redirect(loginErrorUrl("Login service returned an invalid response. Please try again."));
+  }
+
+  const userId = data.user?.id;
+  const accessToken = data.access_token;
+  if (!userId || !accessToken) redirect(loginErrorUrl("Login service returned an incomplete session. Please try again."));
+
+  let profiles: AdminProfile[] = [];
+  try {
+    profiles = await supabaseSelect<AdminProfile>(
+      "profiles",
+      "role,is_active",
+      `&id=eq.${encodeURIComponent(userId)}&limit=1`,
+      accessToken,
+    );
   } catch {
     await clearAdminSession();
-    redirect("/admin/login?error=Unable to verify admin access right now. Please try again.");
+    redirect(loginErrorUrl("Unable to verify admin access right now. Please try again."));
   }
-  if (!p[0] || p[0].role !== "platform_admin" || p[0].is_active !== true) {
+
+  if (!profiles[0] || profiles[0].role !== "platform_admin" || profiles[0].is_active !== true) {
     await clearAdminSession();
-    redirect("/admin/login?error=Your user is authenticated but is not an active platform_admin in profiles");
+    redirect(loginErrorUrl("Your user is authenticated but is not an active platform_admin in profiles."));
   }
+
+  await setAdminSession(userId, accessToken, data.expires_in);
   redirect("/admin/dashboard");
 }
 
