@@ -29,9 +29,9 @@
 - Locations: states, districts, locations in read-only sections.
 - Settings: `platform_settings` rows.
 
-## Demo login
-- Email: `demo.admin@stayinn.test`
-- Password: `StayInn@123`
+## Admin account requirement
+- Admin access is intended for real Supabase users only.
+- The user must have a matching row in `public.profiles` with `role=platform_admin` and `is_active=true`.
 
 ## Known limitations
 - Read-only foundation only; no CRUD/actions implemented.
