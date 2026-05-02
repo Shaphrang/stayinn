@@ -7,15 +7,26 @@ async function doLogin(formData: FormData) {
   "use server";
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const res = await loginWithPassword(email, password);
+  let res: Response;
+  try {
+    res = await loginWithPassword(email, password);
+  } catch {
+    redirect("/admin/login?error=Login service is temporarily unavailable. Please try again.");
+  }
   if (!res.ok) redirect("/admin/login?error=Invalid credentials");
   const data = await res.json();
   const userId = data.user?.id as string;
   await setAdminSession(userId);
-  const byId = await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&id=eq.${userId}&limit=1`);
-  const p = byId.length
-    ? byId
-    : await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&user_id=eq.${userId}&limit=1`);
+  let p: { role: string; is_active: boolean }[] = [];
+  try {
+    const byId = await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&id=eq.${userId}&limit=1`);
+    p = byId.length
+      ? byId
+      : await supabaseSelect<{ role: string; is_active: boolean }>("profiles", "role,is_active", `&user_id=eq.${userId}&limit=1`);
+  } catch {
+    await clearAdminSession();
+    redirect("/admin/login?error=Unable to verify admin access right now. Please try again.");
+  }
   if (!p[0] || p[0].role !== "platform_admin" || p[0].is_active !== true) {
     await clearAdminSession();
     redirect("/admin/login?error=Your user is authenticated but is not an active platform_admin in profiles");
