@@ -3,6 +3,7 @@ const SUPABASE_PUBLIC_KEY_KEYS = [
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
 ] as const;
+const SUPABASE_SERVICE_ROLE_KEYS = ["SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 function readFirst(keys: readonly string[]) {
   for (const key of keys) {
@@ -15,6 +16,7 @@ function readFirst(keys: readonly string[]) {
 export function getSupabaseEnv() {
   const url = readFirst(SUPABASE_URL_KEYS);
   const publishableKey = readFirst(SUPABASE_PUBLIC_KEY_KEYS);
+  const serviceRoleKey = readFirst(SUPABASE_SERVICE_ROLE_KEYS) ?? publishableKey;
 
   if (!url || !publishableKey) {
     throw new Error(
@@ -22,5 +24,5 @@ export function getSupabaseEnv() {
     );
   }
 
-  return { url, publishableKey };
+  return { url, publishableKey, serviceRoleKey };
 }
