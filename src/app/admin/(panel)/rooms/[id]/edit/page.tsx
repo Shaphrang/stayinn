@@ -17,6 +17,8 @@ type RoomFormData = {
   weekend_rate: number;
   season_rate: number | null;
   holiday_rate: number | null;
+  cover_image: string | null;
+  gallery_images: string[] | null;
   status: string;
 };
 
@@ -99,6 +101,8 @@ export default async function EditRoomPage({
       "weekend_rate",
       "season_rate",
       "holiday_rate",
+      "cover_image",
+      "gallery_images",
       "status",
     ].join(","),
     `&id=eq.${id}`,

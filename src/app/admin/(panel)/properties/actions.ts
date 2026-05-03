@@ -344,15 +344,17 @@ async function uploadPropertyFile({
   propertyId,
   folder,
   file,
+  path,
 }: {
   propertyId: string;
   folder: "cover" | "gallery";
   file: File;
+  path?: string;
 }) {
   const fileName = sanitizeFileName(file.name);
-  const path = `properties/${propertyId}/${folder}/${Date.now()}-${fileName}`;
+  const finalPath = path || `properties/${propertyId}/${folder}/${Date.now()}-${fileName}`;
 
-  return uploadToStorage(path, file);
+  return uploadToStorage(finalPath, file);
 }
 
 export async function createProperty(formData: FormData) {
@@ -644,6 +646,7 @@ export async function uploadPropertyCoverImage(formData: FormData) {
 
   const propertyId = String(formData.get("propertyId") ?? "temp");
   const file = formData.get("file");
+  const path = String(formData.get("path") ?? "");
 
   if (!isRealFile(file)) {
     return {
@@ -657,6 +660,7 @@ export async function uploadPropertyCoverImage(formData: FormData) {
       propertyId,
       folder: "cover",
       file,
+      path: path || undefined,
     });
 
     return {
@@ -676,6 +680,7 @@ export async function uploadPropertyGalleryImage(formData: FormData) {
 
   const propertyId = String(formData.get("propertyId") ?? "temp");
   const file = formData.get("file");
+  const path = String(formData.get("path") ?? "");
 
   if (!isRealFile(file)) {
     return {
@@ -689,6 +694,7 @@ export async function uploadPropertyGalleryImage(formData: FormData) {
       propertyId,
       folder: "gallery",
       file,
+      path: path || undefined,
     });
 
     return {
