@@ -13,39 +13,30 @@ export function HeroSection({ data }: { data: HomeData }) {
     "Find stays you’ll love"
   );
 
+  const subtitle = getText(
+    hero.subtitle,
+    "Curated local stays around Meghalaya."
+  );
+
   return (
-    <section className="relative min-h-[132px] overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#00a99d_0%,#079584_48%,#ff6f52_100%)] p-4 shadow-[0_18px_46px_rgba(15,118,110,0.18)]">
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
-      <div className="absolute -bottom-12 left-12 h-28 w-28 rounded-full bg-[#ffd166]/30 blur-2xl" />
-      <div className="absolute right-4 top-4 h-12 w-12 rounded-[22px] border border-white/20 bg-white/12 rotate-12" />
+    <section className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(135deg,#00a99d_0%,#07877e_52%,#ff6f52_100%)] px-4 pb-8 pt-4 shadow-[0_14px_34px_rgba(15,118,110,0.16)]">
+      <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
+      <div className="absolute -bottom-10 left-14 h-20 w-20 rounded-full bg-[#ffd166]/28 blur-2xl" />
+      <div className="absolute right-4 top-4 h-10 w-10 rotate-12 rounded-[18px] border border-white/20 bg-white/10" />
 
-      <div className="relative z-10 flex h-full flex-col justify-between">
-        <div>
-          <p className="text-[12px] font-black text-white/88">
-            Good to see you!
-          </p>
-
-          <h1 className="mt-1 max-w-[235px] text-[24px] font-black leading-[1.02] tracking-[-0.045em] text-white">
-            {title}
-          </h1>
+      <div className="relative z-10">
+        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/82 ring-1 ring-white/16 backdrop-blur">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#ffd166]" />
+          StayInn
         </div>
 
-        <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-[18px] bg-white/90 shadow-sm backdrop-blur">
-          <div className="px-3 py-2.5">
-            <p className="text-[17px] font-black text-[#07877e]">50+</p>
-            <p className="text-[11px] font-bold text-slate-500">Stays</p>
-          </div>
+        <h1 className="max-w-[245px] text-[21px] font-black leading-[1.02] tracking-[-0.045em] text-white">
+          {title}
+        </h1>
 
-          <div className="border-x border-slate-200 px-3 py-2.5">
-            <p className="text-[17px] font-black text-[#07877e]">Local</p>
-            <p className="text-[11px] font-bold text-slate-500">Curated</p>
-          </div>
-
-          <div className="px-3 py-2.5">
-            <p className="text-[17px] font-black text-[#07877e]">Easy</p>
-            <p className="text-[11px] font-bold text-slate-500">Booking</p>
-          </div>
-        </div>
+        <p className="mt-1 max-w-[250px] text-[11px] font-semibold leading-4 text-white/76">
+          {subtitle}
+        </p>
       </div>
     </section>
   );
