@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { optimizeImageFile } from "@/lib/media/image-optimizer";
-import { getPropertyMediaBasePath, getRoomCoverPath, getRoomGalleryPath } from "@/lib/media/storage-paths";
+import { getRoomCoverPath, getRoomGalleryPath } from "@/lib/media/storage-paths";
 import { uploadRoomImage } from "@/app/admin/(panel)/rooms/actions";
 
 type RoomStatus = "active" | "inactive" | "maintenance";
@@ -84,7 +84,9 @@ export function RoomForm({ data, properties, action }: RoomFormProps) {
   const hasProperties = properties.length > 0;
   const [coverImage, setCoverImage] = useState(data?.cover_image ?? "");
   const [galleryImages, setGalleryImages] = useState<string[]>(data?.gallery_images ?? []);
+  const [coverPreview, setCoverPreview] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
   const [uploading, setUploading] = useState(false);
   const selectedProperty = properties.find((p) => p.id === (data?.property_id ?? "")) ?? properties[0];
   const roomMeta = { id: data?.id ?? "temp", slug: selectedType, name: data?.name ?? "room" };
@@ -199,39 +201,47 @@ export function RoomForm({ data, properties, action }: RoomFormProps) {
               if (!file) return;
               setUploading(true); setUploadError("");
               try {
+                setUploadStatus("Optimizing cover image...");
                 const optimized = await optimizeImageFile(file, { maxWidth: 1400, maxHeight: 900, targetMaxBytes: 300000, fallbackMaxBytes: 500000, outputType: "image/webp", qualityStart: 0.88, qualityMin: 0.7 });
-                const fd = new FormData();
+                setCoverPreview(optimized.previewUrl ?? "");
+                setUploadStatus("Uploading cover image...");                const fd = new FormData();
                 fd.set("file", optimized.file);
                 fd.set("path", getRoomCoverPath(propertyMeta, roomMeta));
                 const result = await uploadRoomImage(fd);
-                if (!result.ok || !result.path) throw new Error(result.error ?? "Upload failed");
+                if (!result.ok || !result.path) throw new Error(result.error ?? "Only platform admin can upload images.");
                 setCoverImage(result.path);
+                setUploadStatus("Cover image uploaded.");
               } catch (err) {
                 setUploadError(err instanceof Error ? err.message : "Upload failed");
+                setUploadStatus("");
               } finally { setUploading(false); }
             }} className="mt-1 block w-full rounded-xl border px-3 py-2 text-sm"/></label>
-          {coverImage ? <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/stayinn-media/${coverImage}`} alt="Room cover" className="h-40 w-full rounded-xl object-cover"/> : null}
+          {(coverPreview || coverImage) ? <img src={coverPreview || `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/stayinn-media/${coverImage}`} alt="Room cover" className="h-40 w-full rounded-xl object-cover"/> : null}
           <label className="text-sm font-medium text-slate-700">Gallery Images
             <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={async (e) => {
               const files = Array.from(e.target.files ?? []).slice(0, 8);
               setUploading(true); setUploadError("");
               try {
                 for (const [index, file] of files.entries()) {
+                  setUploadStatus(`Uploading gallery image ${index + 1}/${files.length}...`);                  
                   const optimized = await optimizeImageFile(file, { maxWidth: 1200, maxHeight: 900, targetMaxBytes: 300000, fallbackMaxBytes: 500000, outputType: "image/webp", qualityStart: 0.86, qualityMin: 0.68 });
                   const fd = new FormData();
                   fd.set("file", optimized.file);
                   fd.set("path", getRoomGalleryPath(propertyMeta, roomMeta, index));
                   const result = await uploadRoomImage(fd);
-                  if (!result.ok || !result.path) throw new Error(result.error ?? "Upload failed");
+                  if (!result.ok || !result.path) throw new Error(result.error ?? "Only platform admin can upload images.");
                   setGalleryImages((current) => [...current, result.path!].slice(0, 8));
                 }
+                setUploadStatus("Gallery upload complete.");
               } catch (err) {
                 setUploadError(err instanceof Error ? err.message : "Upload failed");
+                setUploadStatus("");
               } finally { setUploading(false); }
             }} className="mt-1 block w-full rounded-xl border px-3 py-2 text-sm"/></label>
           <div className="grid grid-cols-2 gap-2">{galleryImages.map((path)=><div key={path} className="relative"><img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/stayinn-media/${path}`} alt="Gallery" className="h-24 w-full rounded object-cover"/><button type="button" onClick={()=>setGalleryImages((c)=>c.filter((x)=>x!==path))} className="absolute right-1 top-1 rounded bg-white px-2 text-xs">x</button></div>)}</div>
         </div>
         {uploadError ? <p className="mt-2 text-sm text-rose-700">{uploadError}</p> : null}
+        {uploadStatus ? <p className="mt-2 text-sm text-emerald-700">{uploadStatus}</p> : null}        
       </section>
 
       <section className="rounded-2xl border bg-white p-6 shadow-sm">

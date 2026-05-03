@@ -220,29 +220,36 @@ export function PropertyForm({
 
   const [gallery, setGallery] = useState<string[]>(data?.gallery_images ?? []);
   const [coverPath, setCoverPath] = useState(data?.cover_image ?? "");
+  const [coverPreview, setCoverPreview] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [uploadError, setUploadError] = useState("");
 
   const currentAmenities = data?.amenities ?? [];
   const currentRules = data?.rules ?? [];
-  const coverUrl = getMediaUrl(coverPath);
+  const coverUrl = coverPreview || getMediaUrl(coverPath);
   const propertyMeta = { id: data?.id ?? "temp", slug, name };
 
   async function uploadCover(file: File | null) {
     if (!file) return;
     setUploadError("");
+    setUploadStatus("Optimizing cover image...");
     setUploading(true);
     try {
       const optimized = await optimizeImageFile(file, { maxWidth: 1600, maxHeight: 1000, targetMaxBytes: 300_000, fallbackMaxBytes: 500_000, outputType: "image/webp", qualityStart: 0.88, qualityMin: 0.7 });
+      setCoverPreview(optimized.previewUrl ?? "");
+      setUploadStatus("Uploading cover image...");
       const fd = new FormData();
       fd.set("propertyId", data?.id ?? "temp");
       fd.set("file", optimized.file);
       fd.set("path", getPropertyCoverPath(propertyMeta));
       const result = await uploadPropertyCoverImage(fd);
-      if (!result.ok || !result.path) throw new Error(result.error ?? "Cover upload failed.");
+      if (!result.ok || !result.path) throw new Error(result.error ?? "Only platform admin can upload images.");
       setCoverPath(result.path);
+      setUploadStatus("Cover image uploaded.");
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Cover upload failed.");
+      setUploadStatus("");
     } finally {
       setUploading(false);
     }
@@ -641,16 +648,19 @@ export function PropertyForm({
                 try {
                   for (const [index, file] of files.entries()) {
                     const optimized = await optimizeImageFile(file, { maxWidth: 1400, maxHeight: 1000, targetMaxBytes: 300_000, fallbackMaxBytes: 500_000, outputType: "image/webp", qualityStart: 0.86, qualityMin: 0.68 });
+                    setUploadStatus(`Uploading gallery image ${index + 1}/${files.length}...`);                    
                     const fd = new FormData();
                     fd.set("propertyId", data?.id ?? "temp");
                     fd.set("file", optimized.file);
                     fd.set("path", getPropertyGalleryPath(propertyMeta, index));
                     const result = await uploadPropertyGalleryImage(fd);
-                    if (!result.ok || !result.path) throw new Error(result.error ?? "Gallery upload failed.");
+                    if (!result.ok || !result.path) throw new Error(result.error ?? "Only platform admin can upload images.");
                     setGallery((current) => [...current, result.path!].slice(0, 10));
                   }
+                  setUploadStatus("Gallery upload complete.");            
                 } catch (error) {
                   setUploadError(error instanceof Error ? error.message : "Gallery upload failed.");
+                  setUploadStatus("Gallery upload complete.");                  
                 } finally {
                   setUploading(false);
                 }
@@ -690,7 +700,7 @@ export function PropertyForm({
         </div>
       </section>
       {uploadError ? <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{uploadError}</p> : null}
-
+      {uploadStatus ? <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{uploadStatus}</p> : null}
       <section className="rounded-2xl border bg-white p-6 shadow-sm">
         <div className="mb-5">
           <h2 className="text-lg font-semibold text-slate-900">
@@ -793,8 +803,7 @@ export function PropertyForm({
       <div className="sticky bottom-0 flex flex-col gap-2 border-t bg-slate-50/95 py-4 backdrop-blur sm:flex-row">
         <button
           type="submit"
-          disabled={uploading}
-          disabled={!hasOwners}
+          disabled={uploading || !hasOwners}
           className="rounded-xl bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
           {isEdit ? "Update Property" : "Create Property"}
