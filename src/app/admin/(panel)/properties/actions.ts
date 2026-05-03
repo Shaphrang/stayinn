@@ -68,7 +68,6 @@ const requiredPhoneSchema = z.preprocess((value) => {
 
 const propertySchema = z.object({
   id: postgresUuidSchema.optional(),
-  owner_id: postgresUuidSchema,
   state_id: postgresUuidSchema,
   district_id: postgresUuidSchema,
   location_id: postgresUuidSchema,
@@ -103,10 +102,6 @@ const propertySchema = z.object({
   rules: z.array(z.string()).default([]),
   check_in_time: optionalTextSchema,
   check_out_time: optionalTextSchema,
-  status: z.enum(propertyStatusValues),
-  is_featured: z.boolean().default(false),
-  is_verified: z.boolean().default(false),
-  admin_notes: optionalTextSchema,
 });
 
 const statusUpdateSchema = z.object({
@@ -228,7 +223,6 @@ function buildPropertyPayload(formData: FormData) {
 
   return propertySchema.safeParse({
     id: String(formData.get("id") ?? "") || undefined,
-    owner_id: String(formData.get("owner_id") ?? ""),
     state_id: String(formData.get("state_id") ?? ""),
     district_id: String(formData.get("district_id") ?? ""),
     location_id: String(formData.get("location_id") ?? ""),
@@ -253,16 +247,11 @@ function buildPropertyPayload(formData: FormData) {
     rules: parseRules(formData),
     check_in_time: String(formData.get("check_in_time") ?? ""),
     check_out_time: String(formData.get("check_out_time") ?? ""),
-    status: String(formData.get("status") ?? "draft"),
-    is_featured: parseBoolean(formData.get("is_featured")),
-    is_verified: parseBoolean(formData.get("is_verified")),
-    admin_notes: String(formData.get("admin_notes") ?? ""),
   });
 }
 
 function toDbPayload(data: z.infer<typeof propertySchema>) {
   return {
-    owner_id: data.owner_id,
     state_id: data.state_id,
     district_id: data.district_id,
     location_id: data.location_id,
@@ -283,10 +272,6 @@ function toDbPayload(data: z.infer<typeof propertySchema>) {
     rules: data.rules ?? [],
     check_in_time: data.check_in_time ?? "",
     check_out_time: data.check_out_time ?? "",
-    status: data.status,
-    is_featured: data.is_featured,
-    is_verified: data.is_verified,
-    admin_notes: data.admin_notes ?? "",
   };
 }
 
@@ -367,6 +352,12 @@ export async function createProperty(formData: FormData) {
   }
 
   const id = crypto.randomUUID();
+  const ownerId = String(formData.get("owner_id") ?? "");
+  const ownerIdParsed = postgresUuidSchema.safeParse(ownerId);
+
+  if (!ownerIdParsed.success) {
+    redirectWithError("/admin/properties/new", "Owner is required.");
+  }
 
   try {
     await ensureUniquePropertySlug(parsed.data.slug);
@@ -396,6 +387,11 @@ export async function createProperty(formData: FormData) {
 
     const payload = {
       id,
+      owner_id: ownerIdParsed.data,
+      status: "draft" as PropertyStatus,
+      is_featured: false,
+      is_verified: false,
+      admin_notes: "",
       ...toDbPayload({
         ...parsed.data,
         cover_image: coverImage,
@@ -646,7 +642,7 @@ export async function uploadPropertyCoverImage(formData: FormData) {
 
   const propertyId = String(formData.get("propertyId") ?? "temp");
   const file = formData.get("file");
-  const path = String(formData.get("path") ?? "");
+  const requestedPath = String(formData.get("path") ?? "");
 
   if (!isRealFile(file)) {
     return {
@@ -656,16 +652,16 @@ export async function uploadPropertyCoverImage(formData: FormData) {
   }
 
   try {
-    const path = await uploadPropertyFile({
+    const storagePath = await uploadPropertyFile({
       propertyId,
       folder: "cover",
       file,
-      path: path || undefined,
+      path: requestedPath || undefined,
     });
 
     return {
       ok: true,
-      path,
+      path: storagePath,
     };
   } catch (error) {
     return {
@@ -680,7 +676,7 @@ export async function uploadPropertyGalleryImage(formData: FormData) {
 
   const propertyId = String(formData.get("propertyId") ?? "temp");
   const file = formData.get("file");
-  const path = String(formData.get("path") ?? "");
+  const requestedPath = String(formData.get("path") ?? "");
 
   if (!isRealFile(file)) {
     return {
@@ -690,16 +686,16 @@ export async function uploadPropertyGalleryImage(formData: FormData) {
   }
 
   try {
-    const path = await uploadPropertyFile({
+    const storagePath = await uploadPropertyFile({
       propertyId,
       folder: "gallery",
       file,
-      path: path || undefined,
+      path: requestedPath || undefined,
     });
 
     return {
       ok: true,
-      path,
+      path: storagePath,
     };
   } catch (error) {
     return {
