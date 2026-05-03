@@ -4,7 +4,7 @@ import { Bell, MapPin, Menu } from "lucide-react";
 
 export function HomeHeader() {
   return (
-    <header className="sticky top-0 z-40 bg-[#fff8eb]/88 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl">
+<header className="sticky top-0 z-40 bg-[#fbfcfb]/90 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="flex min-w-0 items-center gap-2.5">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#05a99b] via-[#13b8a8] to-[#f6b23c] text-[15px] font-black text-white shadow-lg shadow-teal-900/20">

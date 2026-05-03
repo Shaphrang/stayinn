@@ -109,21 +109,115 @@ function ImageFallback() {
   );
 }
 
-function FeaturedCard({ item }: { item: StayItem }) {
+function FeaturedCard({ item, index }: { item: StayItem; index: number }) {
   const stay = getStayData(item);
+
+  const borderTone =
+    index % 3 === 0
+      ? "from-[#00a99d] via-[#36c6bb] to-[#ff6f52]"
+      : index % 3 === 1
+        ? "from-[#ffb22e] via-[#ff6f52] to-[#00a99d]"
+        : "from-[#7c5cff] via-[#00a99d] to-[#ff9f43]";
 
   return (
     <Link
       href={getStayHref(item)}
-      className="min-w-0 overflow-hidden rounded-[18px] bg-white shadow-sm ring-1 ring-slate-200/75 active:scale-[0.99]"
+      className={[
+        "block w-[41%] min-w-[148px] max-w-[178px] shrink-0 snap-start rounded-[23px] bg-gradient-to-br p-[1.4px] shadow-[0_12px_28px_rgba(15,23,42,0.10)] active:scale-[0.99]",
+        borderTone,
+      ].join(" ")}
     >
-      <div className="relative h-[86px] bg-slate-100">
+      <div className="overflow-hidden rounded-[21px] bg-white">
+        <div className="relative h-[112px] bg-slate-100">
+          {stay.image ? (
+            <Image
+              src={stay.image}
+              alt={stay.title}
+              width={420}
+              height={300}
+              unoptimized
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <ImageFallback />
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/48 via-transparent to-slate-950/10" />
+
+          <div className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-slate-800 shadow-sm backdrop-blur">
+            {stay.type}
+          </div>
+
+          <button
+            type="button"
+            aria-label="Save stay"
+            className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/92 text-rose-500 shadow-sm backdrop-blur active:scale-95"
+          >
+            <Heart className="h-3.5 w-3.5" />
+          </button>
+
+          <div className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[9px] font-black text-[#b45309] shadow-sm backdrop-blur">
+            <Star className="h-3 w-3 fill-current" />
+            {stay.rating.toFixed(1)}
+          </div>
+        </div>
+
+        <div className="p-2.5">
+          <h3 className="line-clamp-2 min-h-[32px] text-[12.5px] font-black leading-[16px] tracking-[-0.025em] text-slate-950">
+            {stay.title}
+          </h3>
+
+          <p className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-slate-500">
+            <MapPin className="h-3 w-3 shrink-0 text-[#07877e]" />
+            <span className="truncate">{stay.location}</span>
+          </p>
+
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[8.5px] font-black uppercase tracking-wide text-slate-400">
+                From
+              </p>
+
+              <p className="truncate text-[11.5px] font-black text-slate-950">
+                {formatPrice(stay.price)}
+              </p>
+            </div>
+
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#06152f] text-white shadow-sm">
+              <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function WeekendCard({ item, index }: { item: StayItem; index: number }) {
+  const stay = getStayData(item);
+
+  const borderTone =
+    index % 3 === 0
+      ? "from-[#00a99d] via-[#36c6bb] to-[#ff6f52]"
+      : index % 3 === 1
+        ? "from-[#ffb22e] via-[#ff6f52] to-[#00a99d]"
+        : "from-[#7c5cff] via-[#00a99d] to-[#ff9f43]";
+
+  return (
+    <Link
+      href={getStayHref(item)}
+      className={[
+        "block h-[140px] w-[76%] max-w-[320px] shrink-0 snap-start rounded-[25px] bg-gradient-to-br p-[1.5px] shadow-[0_12px_30px_rgba(15,23,42,0.10)] active:scale-[0.99]",
+        borderTone,
+      ].join(" ")}
+    >
+      <div className="relative h-full overflow-hidden rounded-[23px] bg-slate-950">
         {stay.image ? (
           <Image
             src={stay.image}
             alt={stay.title}
-            width={320}
-            height={220}
+            width={620}
+            height={380}
             unoptimized
             className="h-full w-full object-cover"
           />
@@ -131,99 +225,33 @@ function FeaturedCard({ item }: { item: StayItem }) {
           <ImageFallback />
         )}
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-1.5">
-          <span className="rounded-full bg-white/92 px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-slate-800 backdrop-blur">
-            Weekend
-          </span>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/84 via-slate-950/45 to-slate-950/10" />
 
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-rose-500 shadow-sm">
-            <Heart className="h-3.5 w-3.5" />
-          </span>
-        </div>
-      </div>
+        <div className="absolute inset-0 flex flex-col justify-between p-3">
+          <div className="flex items-start justify-between">
+            <span className="rounded-full bg-white/92 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wide text-slate-800 shadow-sm backdrop-blur">
+              Weekend
+            </span>
 
-      <div className="p-2.5">
-        <h3 className="line-clamp-2 min-h-[30px] text-[11px] font-black leading-[15px] tracking-[-0.02em] text-slate-950">
-          {stay.title}
-        </h3>
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-white/92 text-rose-500 shadow-sm backdrop-blur">
+              <Heart className="h-4 w-4" />
+            </span>
+          </div>
 
-        <p className="mt-1 text-[10px] font-bold leading-none text-slate-500">
-          {stay.type}
-        </p>
+          <div>
+            <h3 className="line-clamp-2 max-w-[240px] text-[16px] font-black leading-[18px] tracking-[-0.03em] text-white">
+              {stay.title}
+            </h3>
 
-        <p className="mt-1.5 flex items-center gap-1 text-[9.5px] font-bold text-slate-500">
-          <MapPin className="h-3 w-3 shrink-0 text-[#07877e]" />
-          <span className="truncate">{stay.location}</span>
-        </p>
+            <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-white/78">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{stay.location}</span>
+            </p>
 
-        <div className="mt-2 flex items-center justify-between gap-1">
-          <span className="inline-flex items-center gap-1 text-[9.5px] font-black text-slate-800">
-            <Star className="h-3 w-3 fill-current text-[#b45309]" />
-            {stay.rating.toFixed(1)}
-          </span>
-
-          <span className="truncate text-[10px] font-black text-slate-950">
-            {formatPrice(stay.price)}
-            {stay.price ? (
-              <span className="text-[8.5px] font-bold text-slate-400">
-                {" "}
-                / night
-              </span>
-            ) : null}
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function WeekendCard({ item }: { item: StayItem }) {
-  const stay = getStayData(item);
-
-  return (
-    <Link
-      href={getStayHref(item)}
-      className="relative h-[138px] w-[76%] max-w-[320px] shrink-0 snap-start overflow-hidden rounded-[23px] bg-slate-950 shadow-sm active:scale-[0.99]"
-    >
-      {stay.image ? (
-        <Image
-          src={stay.image}
-          alt={stay.title}
-          width={620}
-          height={380}
-          unoptimized
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <ImageFallback />
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/84 via-slate-950/42 to-slate-950/10" />
-
-      <div className="absolute inset-0 flex flex-col justify-between p-3">
-        <div className="flex items-start justify-between">
-          <span className="rounded-full bg-white/92 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wide text-slate-800">
-            Weekend
-          </span>
-
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-white/92 text-rose-500">
-            <Heart className="h-4 w-4" />
-          </span>
-        </div>
-
-        <div>
-          <h3 className="line-clamp-2 max-w-[240px] text-[16px] font-black leading-[18px] tracking-[-0.03em] text-white">
-            {stay.title}
-          </h3>
-
-          <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-white/78">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{stay.location}</span>
-          </p>
-
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-950">
-            {formatPrice(stay.price)}
-            <ArrowRight className="h-3.5 w-3.5" />
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-950 shadow-sm">
+              {formatPrice(stay.price)}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </div>
           </div>
         </div>
       </div>
@@ -352,22 +380,24 @@ export function StaySection({
       </div>
 
       {layout === "featured" ? (
-        <div className="grid grid-cols-3 gap-2.5">
-          {items.slice(0, 3).map((item, index) => (
+        <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-1">
+          {items.slice(0, 10).map((item, index) => (
             <FeaturedCard
               key={`${getStayHref(item)}-featured-${index}`}
               item={item}
+              index={index}
             />
           ))}
         </div>
       ) : null}
 
       {layout === "weekend" ? (
-        <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1">
+        <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-1">
           {items.slice(0, 8).map((item, index) => (
             <WeekendCard
               key={`${getStayHref(item)}-weekend-${index}`}
               item={item}
+              index={index}
             />
           ))}
         </div>

@@ -19,24 +19,29 @@ export function HeroSection({ data }: { data: HomeData }) {
   );
 
   return (
-    <section className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(135deg,#00a99d_0%,#07877e_52%,#ff6f52_100%)] px-4 pb-8 pt-4 shadow-[0_14px_34px_rgba(15,118,110,0.16)]">
-      <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
-      <div className="absolute -bottom-10 left-14 h-20 w-20 rounded-full bg-[#ffd166]/28 blur-2xl" />
-      <div className="absolute right-4 top-4 h-10 w-10 rotate-12 rounded-[18px] border border-white/20 bg-white/10" />
+    <section className="relative overflow-hidden rounded-[22px] bg-[linear-gradient(135deg,#00a99d_0%,#07877e_58%,#ff6f52_100%)] px-3.5 py-3 shadow-[0_10px_24px_rgba(15,118,110,0.13)]">
+      <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/18 blur-2xl" />
+      <div className="absolute -bottom-8 left-12 h-16 w-16 rounded-full bg-[#ffd166]/25 blur-xl" />
 
-      <div className="relative z-10">
-        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/82 ring-1 ring-white/16 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#ffd166]" />
-          StayInn
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-white/14 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] text-white/82 ring-1 ring-white/14">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd166]" />
+            StayInn
+          </div>
+
+          <h1 className="line-clamp-1 text-[18px] font-black leading-tight tracking-[-0.04em] text-white">
+            {title}
+          </h1>
+
+          <p className="mt-0.5 line-clamp-1 text-[10.5px] font-semibold text-white/76">
+            {subtitle}
+          </p>
         </div>
 
-        <h1 className="max-w-[245px] text-[21px] font-black leading-[1.02] tracking-[-0.045em] text-white">
-          {title}
-        </h1>
-
-        <p className="mt-1 max-w-[250px] text-[11px] font-semibold leading-4 text-white/76">
-          {subtitle}
-        </p>
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[17px] bg-white/16 text-[20px] text-white shadow-inner ring-1 ring-white/20">
+          ✦
+        </div>
       </div>
     </section>
   );

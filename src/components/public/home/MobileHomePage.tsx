@@ -16,20 +16,15 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
   const nearby = data?.nearbyStays ?? [];
 
   return (
-    <main className="min-h-screen bg-[#f7f2e8] text-slate-950">
-      <div className="mx-auto min-h-screen w-full max-w-[460px] overflow-hidden bg-[radial-gradient(circle_at_8%_0%,rgba(20,184,166,0.16),transparent_26%),radial-gradient(circle_at_92%_16%,rgba(255,111,82,0.12),transparent_24%),linear-gradient(180deg,#fffaf1_0%,#f8f2e7_48%,#f6f8f3_100%)] pb-[calc(92px+env(safe-area-inset-bottom))]">
+    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
+      <div className="mx-auto min-h-screen w-full max-w-[460px] overflow-hidden bg-[#fbfcfb] pb-[calc(92px+env(safe-area-inset-bottom))]">
         <HomeHeader />
 
         {data ? (
           <div className="space-y-5">
-            <section className="px-4 pt-3">
-              <div className="relative">
-                <HeroSection data={data} />
-
-              <div className="relative z-20 -mt-12">
-                <HeroSearchCard />
-              </div>
-              </div>
+            <section className="space-y-3 px-4 pt-3">
+              <HeroSection data={data} />
+              <HeroSearchCard />
             </section>
 
             {/*<CategoryChips data={data} />*/}
