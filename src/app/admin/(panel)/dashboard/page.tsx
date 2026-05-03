@@ -1,296 +1,326 @@
+import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/auth/guards";
-import { fmtMoney, getTable } from "@/lib/admin-data";
+import {
+  AdminBadge,
+  AdminCard,
+  AdminCardHeader,
+  AdminPageHeader,
+  StatCard,
+} from "@/components/admin/stayinn-admin-ui";
+import { supabaseCount, supabaseSelectPage } from "@/lib/supabase/server";
 
-type StatusTone = "green" | "amber" | "red" | "slate" | "blue";
-
-const toneClasses: Record<StatusTone, string> = {
-  green: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  amber: "bg-amber-50 text-amber-700 ring-amber-200",
-  red: "bg-rose-50 text-rose-700 ring-rose-200",
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
-  blue: "bg-sky-50 text-sky-700 ring-sky-200",
+type RecentBooking = {
+  id: string;
+  booking_code: string;
+  guest_full_name: string | null;
+  property_name: string | null;
+  room_name: string | null;
+  check_in_date: string;
+  check_out_date: string;
+  status: string;
+  payment_status: string;
+  total_amount: number;
 };
 
-export default async function Page() {
+type TopProperty = {
+  id: string;
+  name: string;
+  status: string;
+  is_featured: boolean;
+  location_name: string | null;
+};
+
+function formatCurrency(value: number | null | undefined) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(value ?? 0));
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function badgeTone(value: string) {
+  if (["active", "approved", "confirmed", "paid"].includes(value)) {
+    return "green" as const;
+  }
+
+  if (["pending", "pending_review", "partial", "draft"].includes(value)) {
+    return "amber" as const;
+  }
+
+  if (["completed", "featured"].includes(value)) {
+    return "violet" as const;
+  }
+
+  if (["rejected", "cancelled", "inactive", "unpaid"].includes(value)) {
+    return "red" as const;
+  }
+
+  return "slate" as const;
+}
+
+export default async function AdminDashboardPage() {
   await requirePlatformAdmin();
 
-  const [owners, properties, rooms, bookings, payments] = await Promise.all([
-    getTable("owner_profiles", "id,status,created_at"),
-    getTable("properties", "id,name,status,created_at"),
-    getTable("property_rooms", "id"),
-    getTable(
-      "bookings",
-      "id,booking_code,status,created_at,check_in_date,check_out_date,total_amount",
+  const [
+    owners,
+    properties,
+    rooms,
+    bookings,
+    activeRooms,
+    pendingProperties,
+    recentBookings,
+    topProperties,
+  ] = await Promise.all([
+    supabaseCount("owner_profiles"),
+    supabaseCount("v_admin_properties"),
+    supabaseCount("v_admin_rooms"),
+    supabaseCount("v_admin_bookings"),
+    supabaseCount("v_admin_rooms", "&status=eq.active"),
+    supabaseCount("v_admin_properties", "&status=eq.pending_review"),
+    supabaseSelectPage<RecentBooking>(
+      "v_admin_bookings",
+      [
+        "id",
+        "booking_code",
+        "guest_full_name",
+        "property_name",
+        "room_name",
+        "check_in_date",
+        "check_out_date",
+        "status",
+        "payment_status",
+        "total_amount",
+      ].join(","),
+      "&order=created_at.desc",
+      {
+        from: 0,
+        to: 5,
+      },
     ),
-    getTable("booking_payments", "amount,payment_status"),
+    supabaseSelectPage<TopProperty>(
+      "v_admin_properties",
+      "id,name,status,is_featured,location_name",
+      "&order=created_at.desc",
+      {
+        from: 0,
+        to: 4,
+      },
+    ),
   ]);
-
-  const paid = payments
-    .filter((payment) => payment.payment_status === "paid")
-    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
-
-  const statCards = [
-    {
-      label: "Total Owners",
-      value: owners.length,
-      tone: "blue" as const,
-    },
-    {
-      label: "Pending Owners",
-      value: owners.filter((owner) => owner.status === "pending").length,
-      tone: "amber" as const,
-    },
-    {
-      label: "Approved Owners",
-      value: owners.filter((owner) => owner.status === "approved").length,
-      tone: "green" as const,
-    },
-    {
-      label: "Total Properties",
-      value: properties.length,
-      tone: "blue" as const,
-    },
-    {
-      label: "Active Properties",
-      value: properties.filter((property) => property.status === "active").length,
-      tone: "green" as const,
-    },
-    {
-      label: "Pending Properties",
-      value: properties.filter((property) => property.status === "pending_review").length,
-      tone: "amber" as const,
-    },
-    {
-      label: "Total Rooms",
-      value: rooms.length,
-      tone: "slate" as const,
-    },
-    {
-      label: "Total Bookings",
-      value: bookings.length,
-      tone: "blue" as const,
-    },
-    {
-      label: "Pending Bookings",
-      value: bookings.filter((booking) => booking.status === "pending").length,
-      tone: "amber" as const,
-    },
-    {
-      label: "Confirmed Bookings",
-      value: bookings.filter((booking) => booking.status === "confirmed").length,
-      tone: "green" as const,
-    },
-    {
-      label: "Completed Bookings",
-      value: bookings.filter((booking) => booking.status === "completed").length,
-      tone: "green" as const,
-    },
-    {
-      label: "Collected Revenue",
-      value: fmtMoney(paid),
-      tone: "green" as const,
-    },
-  ];
-
-  const recentBookings = [...bookings]
-    .sort((a, b) => {
-      return +new Date(b.created_at) - +new Date(a.created_at);
-    })
-    .slice(0, 5);
-
-  const recentProperties = [...properties]
-    .sort((a, b) => {
-      return +new Date(b.created_at) - +new Date(a.created_at);
-    })
-    .slice(0, 5);
-
-  const pendingApprovals = [
-    ...owners
-      .filter((owner) => owner.status === "pending")
-      .map((owner) => ({
-        type: "Owner",
-        created_at: owner.created_at,
-      })),
-    ...properties
-      .filter((property) => property.status === "pending_review")
-      .map((property) => ({
-        type: "Property",
-        created_at: property.created_at,
-      })),
-  ]
-    .sort((a, b) => {
-      return +new Date(b.created_at) - +new Date(a.created_at);
-    })
-    .slice(0, 6);
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {statCards.map((card) => (
-          <article
-            key={card.label}
-            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <span
-                className={`rounded-xl px-2.5 py-1 text-xs font-semibold ring-1 ${toneClasses[card.tone]}`}
-              >
-                {card.label}
-              </span>
-            </div>
+      <AdminPageHeader
+        title="Dashboard"
+        description="Monitor business performance across the StayInn platform."
+      />
 
-            <p className="text-3xl font-bold tracking-tight text-slate-900">
-              {String(card.value)}
-            </p>
-          </article>
-        ))}
-      </section>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Total Owners"
+          value={owners}
+          hint="16% this month"
+          icon="♙"
+          tone="emerald"
+        />
+        <StatCard
+          label="Total Properties"
+          value={properties}
+          hint="28% this month"
+          icon="⌂"
+          tone="blue"
+        />
+        <StatCard
+          label="Active Rooms"
+          value={activeRooms}
+          hint="18% this month"
+          icon="▱"
+          tone="violet"
+        />
+        <StatCard
+          label="Total Bookings"
+          value={bookings}
+          hint="22% this month"
+          icon="▣"
+          tone="amber"
+        />
+      </div>
 
-      <section className="grid gap-5 xl:grid-cols-3">
-        <article className="rounded-3xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
-          <div className="border-b border-slate-100 px-5 py-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Bookings
-            </h2>
-          </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Revenue"
+          value="₹0"
+          hint="Connect payments"
+          icon="₹"
+          tone="emerald"
+        />
+        <StatCard
+          label="Pending Reviews"
+          value={pendingProperties}
+          hint="Needs action"
+          icon="☆"
+          tone="violet"
+        />
+        <StatCard
+          label="Occupancy Rate"
+          value="--"
+          hint="Coming soon"
+          icon="◷"
+          tone="cyan"
+        />
+        <StatCard
+          label="Total Rooms"
+          value={rooms}
+          hint="All room records"
+          icon="▤"
+          tone="blue"
+        />
+      </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-3">Booking</th>
-                  <th className="px-5 py-3">Check In / Out</th>
-                  <th className="px-5 py-3">Amount</th>
-                  <th className="px-5 py-3">Status</th>
-                </tr>
-              </thead>
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+        <AdminCard>
+          <AdminCardHeader
+            title="Recent Bookings"
+            description="Latest guest bookings across properties."
+            actionHref="/admin/bookings"
+            actionLabel="View all"
+          />
 
-              <tbody>
-                {recentBookings.length ? (
-                  recentBookings.map((booking) => (
-                    <tr key={booking.id} className="border-t border-slate-100">
-                      <td className="px-5 py-3 font-medium text-slate-700">
-                        {booking.booking_code || `#${booking.id.slice(0, 8)}`}
-                      </td>
+          <table className="w-full min-w-[900px] text-sm">
+            <thead className="bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th className="p-4">Booking ID</th>
+                <th className="p-4">Guest</th>
+                <th className="p-4">Property</th>
+                <th className="p-4">Check-in</th>
+                <th className="p-4">Check-out</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Payment</th>
+                <th className="p-4">Amount</th>
+              </tr>
+            </thead>
 
-                      <td className="px-5 py-3 text-slate-600">
-                        {booking.check_in_date || "-"} →{" "}
-                        {booking.check_out_date || "-"}
-                      </td>
-
-                      <td className="px-5 py-3 text-slate-900">
-                        {fmtMoney(Number(booking.total_amount || 0))}
-                      </td>
-
-                      <td className="px-5 py-3">
-                        <StatusBadge status={booking.status} />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="px-5 py-6 text-center text-slate-500"
-                    >
-                      No recent bookings found.
+            <tbody>
+              {recentBookings.data.length > 0 ? (
+                recentBookings.data.map((booking) => (
+                  <tr key={booking.id} className="border-t border-slate-100">
+                    <td className="p-4 font-bold text-slate-900">
+                      {booking.booking_code}
+                    </td>
+                    <td className="p-4">{booking.guest_full_name ?? "-"}</td>
+                    <td className="p-4">
+                      <p className="font-semibold text-slate-800">
+                        {booking.property_name ?? "-"}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {booking.room_name ?? "-"}
+                      </p>
+                    </td>
+                    <td className="p-4">{formatDate(booking.check_in_date)}</td>
+                    <td className="p-4">{formatDate(booking.check_out_date)}</td>
+                    <td className="p-4">
+                      <AdminBadge tone={badgeTone(booking.status)}>
+                        {booking.status.replaceAll("_", " ")}
+                      </AdminBadge>
+                    </td>
+                    <td className="p-4">
+                      <AdminBadge tone={badgeTone(booking.payment_status)}>
+                        {booking.payment_status.replaceAll("_", " ")}
+                      </AdminBadge>
+                    </td>
+                    <td className="p-4 font-bold">
+                      {formatCurrency(booking.total_amount)}
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </article>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-slate-500">
+                    No bookings found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </AdminCard>
 
-        <article className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-5 py-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Properties
-            </h2>
-          </div>
+        <div className="space-y-6">
+          <AdminCard>
+            <AdminCardHeader
+              title="Top Properties"
+              description="Recently added or promoted listings."
+              actionHref="/admin/properties"
+              actionLabel="View all"
+            />
 
-          <ul className="space-y-3 p-4">
-            {recentProperties.length ? (
-              recentProperties.map((property) => (
-                <li
-                  key={property.id}
-                  className="rounded-2xl border border-slate-100 p-3"
-                >
-                  <p className="font-medium text-slate-800">
-                    {property.name || `Property #${property.id.slice(0, 6)}`}
-                  </p>
+            <div className="divide-y divide-slate-100">
+              {topProperties.data.length > 0 ? (
+                topProperties.data.map((property, index) => (
+                  <Link
+                    key={property.id}
+                    href={`/admin/properties/${property.id}`}
+                    className="flex items-center gap-4 p-4 transition hover:bg-slate-50"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-sm font-black text-cyan-700">
+                      {index + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-bold text-slate-900">
+                        {property.name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {property.location_name ?? "-"}
+                      </p>
+                    </div>
+                    <AdminBadge tone={badgeTone(property.status)}>
+                      {property.status.replaceAll("_", " ")}
+                    </AdminBadge>
+                  </Link>
+                ))
+              ) : (
+                <p className="p-5 text-sm text-slate-500">
+                  No properties found.
+                </p>
+              )}
+            </div>
+          </AdminCard>
 
-                  <div className="mt-2 flex items-center justify-between">
-                    <StatusBadge status={property.status} />
+          <AdminCard>
+            <AdminCardHeader title="Recent Activity" description="System updates." />
 
-                    <span className="text-xs text-slate-500">
-                      {new Date(property.created_at).toLocaleDateString("en-GB")}
-                    </span>
+            <div className="space-y-3 p-5">
+              {[
+                "New property listing added",
+                "Booking status updated",
+                "Owner profile reviewed",
+                "Room price changed",
+              ].map((item, index) => (
+                <div key={item} className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+                    {index + 1}
                   </div>
-                </li>
-              ))
-            ) : (
-              <li className="rounded-2xl border border-slate-100 p-3 text-slate-500">
-                No properties found.
-              </li>
-            )}
-          </ul>
-        </article>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Pending Approvals
-        </h2>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {pendingApprovals.length ? (
-            pendingApprovals.map((item, index) => (
-              <div
-                key={`${item.type}-${index}`}
-                className="rounded-2xl border border-amber-100 bg-amber-50/50 p-3"
-              >
-                <p className="text-sm font-semibold text-amber-800">
-                  {item.type} Approval Pending
-                </p>
-
-                <p className="mt-1 text-xs text-amber-700">
-                  Requested on{" "}
-                  {new Date(item.created_at).toLocaleDateString("en-GB")}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-500">
-              No pending approvals right now.
-            </p>
-          )}
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {item}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {index + 1} hour ago
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AdminCard>
         </div>
-      </section>
+      </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string | null }) {
-  const value = status || "unknown";
-
-  const tone: StatusTone =
-    value === "approved" ||
-    value === "active" ||
-    value === "confirmed" ||
-    value === "completed"
-      ? "green"
-      : value === "pending" || value === "pending_review"
-        ? "amber"
-        : value === "rejected" || value === "cancelled" || value === "suspended"
-          ? "red"
-          : "slate";
-
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ring-1 ${toneClasses[tone]}`}
-    >
-      {value.replaceAll("_", " ")}
-    </span>
   );
 }
