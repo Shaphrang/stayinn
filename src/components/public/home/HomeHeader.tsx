@@ -4,19 +4,20 @@ import { Bell, MapPin, Menu } from "lucide-react";
 
 export function HomeHeader() {
   return (
-    <header className="sticky top-0 z-40 bg-[#fff8eb]/82 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 bg-[#fff8eb]/88 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#0f9f9a] via-[#13b8a8] to-[#f59e0b] text-sm font-black text-white shadow-md shadow-teal-900/15">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#05a99b] via-[#13b8a8] to-[#f6b23c] text-[15px] font-black text-white shadow-lg shadow-teal-900/20">
             S
           </span>
 
           <span className="min-w-0">
-            <span className="block bg-gradient-to-r from-[#0f766e] via-[#0f9f9a] to-[#e57918] bg-clip-text text-[18px] font-black leading-none tracking-[-0.03em] text-transparent">
+            <span className="block text-[21px] font-black leading-none tracking-[-0.045em] text-[#07877e]">
               StayInn
             </span>
-            <span className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-slate-500">
-              <MapPin className="h-3 w-3 text-[#0f9f9a]" />
+
+            <span className="mt-1 flex items-center gap-1 text-[12px] font-bold text-slate-500">
+              <MapPin className="h-3.5 w-3.5 text-[#0f9f9a]" />
               Shillong, Meghalaya
             </span>
           </span>
@@ -26,17 +27,17 @@ export function HomeHeader() {
           <button
             type="button"
             aria-label="Notifications"
-            className="grid h-10 w-10 place-items-center rounded-2xl bg-[#fff3df] text-[#b45309] shadow-sm ring-1 ring-orange-100 active:scale-95"
+            className="grid h-11 w-11 place-items-center rounded-[20px] bg-[#fff2d8] text-[#b45309] shadow-sm ring-1 ring-orange-100 active:scale-95"
           >
-            <Bell className="h-[18px] w-[18px]" />
+            <Bell className="h-[19px] w-[19px]" />
           </button>
 
           <button
             type="button"
             aria-label="Open menu"
-            className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white shadow-sm active:scale-95"
+            className="grid h-11 w-11 place-items-center rounded-[20px] bg-[#06152f] text-white shadow-lg shadow-slate-950/15 active:scale-95"
           >
-            <Menu className="h-[18px] w-[18px]" />
+            <Menu className="h-[21px] w-[21px]" />
           </button>
         </div>
       </div>

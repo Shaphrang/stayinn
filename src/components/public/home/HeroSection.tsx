@@ -8,55 +8,42 @@ function getText(value: unknown, fallback: string) {
 export function HeroSection({ data }: { data: HomeData }) {
   const hero = data.hero as Record<string, unknown>;
 
-  const tagline = getText(
-    hero.tagline || hero.subtitle,
-    "Your stay, perfectly curated."
+  const title = getText(
+    hero.title || hero.tagline,
+    "Find stays you’ll love"
   );
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,#083f3c_0%,#0f9f9a_42%,#f59e0b_100%)] px-4 py-4 shadow-[0_16px_42px_rgba(15,118,110,0.22)]">
-      <div className="absolute -left-8 -top-8 h-28 w-28 rounded-full bg-white/18 blur-2xl" />
-      <div className="absolute -bottom-12 right-10 h-28 w-28 rounded-full bg-[#ffe2a8]/35 blur-2xl" />
-      <div className="absolute right-5 top-5 h-14 w-14 rotate-12 rounded-[22px] border border-white/20 bg-white/10" />
-      <div className="absolute bottom-4 left-[58%] h-8 w-8 rounded-full border border-white/20 bg-white/10" />
-      <div className="absolute left-4 top-1/2 h-16 w-16 rounded-full border border-white/10" />
+    <section className="relative min-h-[132px] overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#00a99d_0%,#079584_48%,#ff6f52_100%)] p-4 shadow-[0_18px_46px_rgba(15,118,110,0.18)]">
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
+      <div className="absolute -bottom-12 left-12 h-28 w-28 rounded-full bg-[#ffd166]/30 blur-2xl" />
+      <div className="absolute right-4 top-4 h-12 w-12 rounded-[22px] border border-white/20 bg-white/12 rotate-12" />
 
-      <div className="relative z-10">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white/80 ring-1 ring-white/18 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#ffd166]" />
-          StayInn
-        </div>
+      <div className="relative z-10 flex h-full flex-col justify-between">
+        <div>
+          <p className="text-[12px] font-black text-white/88">
+            Good to see you!
+          </p>
 
-        <div className="flex items-end justify-between gap-3">
-          <h1 className="max-w-[270px] text-[25px] font-black leading-[1.02] tracking-[-0.045em] text-white">
-            {tagline}
+          <h1 className="mt-1 max-w-[235px] text-[24px] font-black leading-[1.02] tracking-[-0.045em] text-white">
+            {title}
           </h1>
-
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[23px] bg-white/16 text-[24px] shadow-inner ring-1 ring-white/20 backdrop-blur">
-            ✦
-          </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <div className="rounded-2xl bg-white/13 px-3 py-2 ring-1 ring-white/14 backdrop-blur">
-            <p className="text-[15px] font-black text-white">50+</p>
-            <p className="text-[9px] font-bold uppercase tracking-wide text-white/65">
-              Stays
-            </p>
+        <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-[18px] bg-white/90 shadow-sm backdrop-blur">
+          <div className="px-3 py-2.5">
+            <p className="text-[17px] font-black text-[#07877e]">50+</p>
+            <p className="text-[11px] font-bold text-slate-500">Stays</p>
           </div>
 
-          <div className="rounded-2xl bg-white/13 px-3 py-2 ring-1 ring-white/14 backdrop-blur">
-            <p className="text-[15px] font-black text-white">Local</p>
-            <p className="text-[9px] font-bold uppercase tracking-wide text-white/65">
-              Curated
-            </p>
+          <div className="border-x border-slate-200 px-3 py-2.5">
+            <p className="text-[17px] font-black text-[#07877e]">Local</p>
+            <p className="text-[11px] font-bold text-slate-500">Curated</p>
           </div>
 
-          <div className="rounded-2xl bg-white/13 px-3 py-2 ring-1 ring-white/14 backdrop-blur">
-            <p className="text-[15px] font-black text-white">Easy</p>
-            <p className="text-[9px] font-bold uppercase tracking-wide text-white/65">
-              Booking
-            </p>
+          <div className="px-3 py-2.5">
+            <p className="text-[17px] font-black text-[#07877e]">Easy</p>
+            <p className="text-[11px] font-bold text-slate-500">Booking</p>
           </div>
         </div>
       </div>

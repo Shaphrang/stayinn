@@ -16,29 +16,27 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
   const nearby = data?.nearbyStays ?? [];
 
   return (
-    <main className="min-h-screen bg-[#f8f5ec] text-slate-950">
-      <div className="mx-auto min-h-screen w-full max-w-[460px] bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.16),transparent_30%),radial-gradient(circle_at_85%_18%,rgba(251,146,60,0.17),transparent_28%),linear-gradient(180deg,#fff9ed_0%,#f7f3ea_44%,#f5f7f2_100%)] pb-[calc(92px+env(safe-area-inset-bottom))]">
+    <main className="min-h-screen bg-[#f7f2e8] text-slate-950">
+      <div className="mx-auto min-h-screen w-full max-w-[460px] overflow-hidden bg-[radial-gradient(circle_at_8%_0%,rgba(20,184,166,0.18),transparent_26%),radial-gradient(circle_at_92%_16%,rgba(255,111,82,0.14),transparent_24%),linear-gradient(180deg,#fff9ed_0%,#f8f2e7_48%,#f4f7f1_100%)] pb-[calc(92px+env(safe-area-inset-bottom))]">
         <HomeHeader />
 
         {data ? (
           <div className="space-y-5">
-            <div className="px-4 pt-3">
+            <section className="px-4 pt-3">
               <HeroSection data={data} />
-            </div>
+            </section>
 
-            <div className="px-4">
+            <section className="px-4">
               <HeroSearchCard />
-            </div>
+            </section>
 
             <CategoryChips data={data} />
-
             <CategoryGrid data={data} />
-
             <PromoBannerCarousel data={data} />
 
             <StaySection
               title="Featured stays"
-              subtitle="Handpicked places guests love"
+              subtitle="Handpicked places, loved by guests"
               items={featured}
               viewAllHref="/stays?featured=true"
               layout="featured"
@@ -46,7 +44,7 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
 
             <StaySection
               title="Weekend picks"
-              subtitle="Swipe for quick escapes"
+              subtitle="Quick escapes for your weekend"
               items={weekend}
               viewAllHref="/stays?section=weekend"
               layout="weekend"
@@ -54,7 +52,7 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
 
             <StaySection
               title="Nearby stays"
-              subtitle="Colorful stays close to you"
+              subtitle="Stays close to you"
               items={nearby}
               viewAllHref="/stays?nearby=true"
               layout="nearby"

@@ -2,79 +2,95 @@
 import Link from "next/link";
 import {
   Building2,
+  Grid2X2,
   Home,
   Hotel,
   Landmark,
+  Palmtree,
   Sparkles,
   TentTree,
 } from "lucide-react";
 import type { HomeData } from "./types";
 
 const fallback = [
-  { label: "Resorts", value: "resorts" },
-  { label: "Homestays", value: "homestays" },
-  { label: "Guesthouses", value: "guesthouses" },
-  { label: "Hotels", value: "hotels" },
-  { label: "Villas", value: "villas" },
+  { label: "Homestay", value: "homestay" },
+  { label: "Resort", value: "resort" },
+  { label: "Guest House", value: "guest_house" },
+  { label: "Hotel", value: "hotel" },
+  { label: "Cottage", value: "cottage" },
   { label: "Camping", value: "camping" },
 ];
 
 const tones = [
-  "from-[#0f9f9a] to-[#7dd3fc] text-white shadow-teal-900/20",
-  "from-[#f59e0b] to-[#fb7185] text-white shadow-orange-900/20",
-  "from-[#6366f1] to-[#a855f7] text-white shadow-indigo-900/20",
-  "from-[#10b981] to-[#84cc16] text-white shadow-emerald-900/20",
-  "from-[#ef4444] to-[#f97316] text-white shadow-red-900/20",
-  "from-[#14b8a6] to-[#0f766e] text-white shadow-teal-900/20",
+  "from-[#00a99d] to-[#07877e]",
+  "from-[#ff6f52] to-[#ff4d43]",
+  "from-[#f6a72f] to-[#ff8a00]",
+  "from-[#ff6f52] to-[#f36b7f]",
+  "from-[#13b8a8] to-[#3abf8f]",
+  "from-[#07877e] to-[#128b65]",
+  "from-[#7c5cff] to-[#8f6bff]",
 ];
+
+function prettyLabel(value: string) {
+  return value
+    .replace(/_/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 function CategoryIcon({ label }: { label: string }) {
   const lower = label.toLowerCase();
 
   if (lower.includes("home")) return <Home className="h-6 w-6" />;
-  if (lower.includes("villa")) return <Landmark className="h-6 w-6" />;
-  if (lower.includes("camp")) return <TentTree className="h-6 w-6" />;
+  if (lower.includes("resort")) return <Sparkles className="h-6 w-6" />;
   if (lower.includes("guest")) return <Building2 className="h-6 w-6" />;
   if (lower.includes("hotel")) return <Hotel className="h-6 w-6" />;
+  if (lower.includes("cottage")) return <Landmark className="h-6 w-6" />;
+  if (lower.includes("camp")) return <TentTree className="h-6 w-6" />;
+  if (lower.includes("villa")) return <Palmtree className="h-6 w-6" />;
 
-  return <Sparkles className="h-6 w-6" />;
+  return <Grid2X2 className="h-6 w-6" />;
 }
 
 export function CategoryGrid({ data }: { data: HomeData }) {
-  const cats = data.categories.length ? data.categories : fallback;
+  const categories = data.categories.length ? data.categories : fallback;
 
   return (
     <section className="px-4">
-      <div className="mb-3 flex items-end justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <div>
-          <h2 className="text-[15px] font-black tracking-tight text-slate-950">
-            Explore types
+          <h2 className="text-[16px] font-black tracking-tight text-slate-950">
+            Top categories
           </h2>
-          <p className="mt-0.5 text-[12px] font-semibold text-slate-500">
-            Choose your stay mood
+          <p className="mt-0.5 text-[12px] font-bold text-slate-500">
+            Browse by category
           </p>
         </div>
+
+        <Link href="/stays" className="text-[12px] font-black text-[#07877e]">
+          View all
+        </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-y-3">
-        {cats.slice(0, 6).map((cat, index) => (
+      <div className="grid grid-cols-6 gap-2">
+        {categories.slice(0, 6).map((category, index) => (
           <Link
-            key={cat.value}
-            href={`/stays?propertyType=${encodeURIComponent(cat.value)}`}
-            className="flex flex-col items-center text-center active:scale-[0.97]"
+            key={category.value}
+            href={`/stays?propertyType=${encodeURIComponent(category.value)}`}
+            className="flex min-w-0 flex-col items-center text-center active:scale-[0.96]"
           >
-            <div
+            <span
               className={[
-                "grid h-[54px] w-[54px] place-items-center rounded-[22px] bg-gradient-to-br shadow-lg ring-1 ring-white/45",
+                "grid h-[46px] w-[46px] place-items-center rounded-[17px] bg-gradient-to-br text-white shadow-lg shadow-slate-900/10 ring-1 ring-white/50",
                 tones[index % tones.length],
               ].join(" ")}
             >
-              <CategoryIcon label={cat.label} />
-            </div>
+              <CategoryIcon label={category.label} />
+            </span>
 
-            <p className="mt-2 line-clamp-2 min-h-[28px] max-w-[92px] text-[11px] font-black leading-[14px] text-slate-800">
-              {cat.label}
-            </p>
+            <span className="mt-1.5 line-clamp-1 w-full text-[10px] font-black text-slate-700">
+              {prettyLabel(category.label)}
+            </span>
           </Link>
         ))}
       </div>
