@@ -119,3 +119,36 @@
 - Add lightweight client-side event tracking via existing public events service.
 - Improve category artwork and property image source curation for production polish.
 - Implement `/stays` listing page to complete link flow from homepage search/chips/sections.
+
+## 2026-05-03 (admin media upload hardening)
+
+### Files created
+- `src/lib/media/storage-paths.ts`
+- `src/lib/media/image-optimizer.ts`
+- `src/components/admin/media/ImageUploadField.tsx`
+- `src/components/admin/media/GalleryUploadField.tsx`
+
+### Files modified
+- `src/components/admin/property-form.tsx`
+- `src/app/admin/(panel)/properties/actions.ts`
+- `src/components/admin/room-form.tsx`
+- `src/app/admin/(panel)/rooms/actions.ts`
+- `src/app/admin/(panel)/rooms/[id]/edit/page.tsx`
+- `docs/stayinn/changelog.md`
+
+### Features added
+- Added reusable storage-path utilities to generate sanitized `stayinn-media` paths with `slug + short-id` folder patterns.
+- Added client-side WebP optimization utility with resize + quality stepping toward ~200-300KB target and 500KB fallback guardrail.
+- Integrated optimized cover/gallery upload flow into admin property and room forms with preview/remove behavior and submit disable while uploading.
+- Updated room CRUD actions/schema to persist `cover_image` and `gallery_images` paths.
+
+### Known limitations
+- Build currently fails in this environment due to Google Fonts fetch errors from `next/font` (external network path).
+- Existing property create/update actions still keep legacy file-upload support for backward compatibility.
+
+### Testing steps
+- Run `npm run build`.
+
+### Next recommended steps
+- Add optional safe storage-object cleanup worker for unreferenced media paths.
+- Add consistent media widgets usage across any future admin forms containing `image_path` fields.

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePlatformAdmin } from "@/lib/auth/guards";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import {
   supabaseInsert,
   supabasePatch,
@@ -53,6 +54,8 @@ const roomSchema = z.object({
   weekend_rate: requiredRateSchema,
   season_rate: rateSchema,
   holiday_rate: rateSchema,
+  cover_image: z.string().optional().default(""),
+  gallery_images: z.array(z.string()).default([]),
   status: z.enum(roomStatusValues),
 });
 
@@ -113,8 +116,26 @@ function buildRoomPayload(formData: FormData) {
     weekend_rate: String(formData.get("weekend_rate") ?? ""),
     season_rate: String(formData.get("season_rate") ?? "0"),
     holiday_rate: String(formData.get("holiday_rate") ?? "0"),
+    cover_image: String(formData.get("cover_image") ?? ""),
+    gallery_images: (() => {
+      try {
+        const parsed = JSON.parse(String(formData.get("gallery_images") ?? "[]"));
+        return Array.isArray(parsed) ? parsed.map(String) : [];
+      } catch {
+        return [];
+      }
+    })(),
     status: String(formData.get("status") ?? "active"),
   });
+}
+
+async function uploadToStorage(path: string, file: File) {
+  const { url, serviceRoleKey } = getSupabaseEnv();
+  if (!serviceRoleKey) throw new Error("Supabase service role key is not configured.");
+  const cleanUrl = url.replace(/\/$/, "");
+  const res = await fetch(`${cleanUrl}/storage/v1/object/stayinn-media/${path}`, { method: "POST", headers: { Authorization: `Bearer ${serviceRoleKey}`, apikey: serviceRoleKey, "x-upsert": "true", "Content-Type": file.type || "application/octet-stream" }, body: Buffer.from(await file.arrayBuffer()), cache: "no-store" });
+  if (!res.ok) throw new Error((await res.text()) || "Image upload failed. Please try again.");
+  return path;
 }
 
 async function ensureUniqueRoomName(payload: {
@@ -173,6 +194,8 @@ export async function createRoom(formData: FormData) {
       weekend_rate: parsed.data.weekend_rate,
       season_rate: parsed.data.season_rate,
       holiday_rate: parsed.data.holiday_rate,
+      cover_image: parsed.data.cover_image,
+      gallery_images: parsed.data.gallery_images,
       status: parsed.data.status,
     });
   } catch (error) {
@@ -219,6 +242,8 @@ export async function updateRoom(formData: FormData) {
         weekend_rate: parsed.data.weekend_rate,
         season_rate: parsed.data.season_rate,
         holiday_rate: parsed.data.holiday_rate,
+        cover_image: parsed.data.cover_image,
+        gallery_images: parsed.data.gallery_images,
         status: parsed.data.status,
       },
       `id=eq.${id}`,
@@ -235,6 +260,18 @@ export async function updateRoom(formData: FormData) {
   revalidatePath(editPath);
 
   redirectWithSuccess(`/admin/rooms/${id}`, "Room updated successfully.");
+}
+
+export async function uploadRoomImage(formData: FormData) {
+  await requirePlatformAdmin();
+  const file = formData.get("file");
+  const path = String(formData.get("path") ?? "");
+  if (!(file instanceof File) || file.size <= 0 || !path) return { ok: false, error: "Image is required." };
+  try {
+    return { ok: true, path: await uploadToStorage(path, file) };
+  } catch (error) {
+    return { ok: false, error: getErrorMessage(error, "Unable to upload room image.") };
+  }
 }
 
 export async function setRoomStatus(formData: FormData) {

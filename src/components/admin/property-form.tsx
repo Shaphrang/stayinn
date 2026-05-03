@@ -3,6 +3,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { optimizeImageFile } from "@/lib/media/image-optimizer";
+import { getPropertyCoverPath, getPropertyGalleryPath } from "@/lib/media/storage-paths";
+import { uploadPropertyCoverImage, uploadPropertyGalleryImage } from "@/app/admin/(panel)/properties/actions";
 
 type PropertyType =
   | "homestay"
@@ -216,10 +219,34 @@ export function PropertyForm({
   );
 
   const [gallery, setGallery] = useState<string[]>(data?.gallery_images ?? []);
+  const [coverPath, setCoverPath] = useState(data?.cover_image ?? "");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const currentAmenities = data?.amenities ?? [];
   const currentRules = data?.rules ?? [];
-  const coverUrl = getMediaUrl(data?.cover_image);
+  const coverUrl = getMediaUrl(coverPath);
+  const propertyMeta = { id: data?.id ?? "temp", slug, name };
+
+  async function uploadCover(file: File | null) {
+    if (!file) return;
+    setUploadError("");
+    setUploading(true);
+    try {
+      const optimized = await optimizeImageFile(file, { maxWidth: 1600, maxHeight: 1000, targetMaxBytes: 300_000, fallbackMaxBytes: 500_000, outputType: "image/webp", qualityStart: 0.88, qualityMin: 0.7 });
+      const fd = new FormData();
+      fd.set("propertyId", data?.id ?? "temp");
+      fd.set("file", optimized.file);
+      fd.set("path", getPropertyCoverPath(propertyMeta));
+      const result = await uploadPropertyCoverImage(fd);
+      if (!result.ok || !result.path) throw new Error(result.error ?? "Cover upload failed.");
+      setCoverPath(result.path);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Cover upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const amenityOptions = useMemo(() => {
     return amenitiesMaster.length > 0
@@ -252,11 +279,7 @@ export function PropertyForm({
         <input type="hidden" name="id" value={data?.id ?? ""} />
       ) : null}
 
-      <input
-        type="hidden"
-        name="cover_image"
-        value={data?.cover_image ?? ""}
-      />
+      <input type="hidden" name="cover_image" value={coverPath} />
 
       <input
         type="hidden"
@@ -587,9 +610,9 @@ export function PropertyForm({
             <label className="text-sm font-medium text-slate-700">
               Cover Image
               <input
-                name="cover_file"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => uploadCover(event.target.files?.[0] ?? null)}
                 className="mt-1 block w-full rounded-xl border px-3 py-2 text-sm"
               />
             </label>
@@ -610,13 +633,28 @@ export function PropertyForm({
           <div>
             <label className="text-sm font-medium text-slate-700">
               Gallery Images
-              <input
-                name="gallery_files"
-                type="file"
-                accept="image/*"
-                multiple
-                className="mt-1 block w-full rounded-xl border px-3 py-2 text-sm"
-              />
+              <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={async (event) => {
+                const files = Array.from(event.target.files ?? []);
+                if (files.length === 0) return;
+                setUploadError("");
+                setUploading(true);
+                try {
+                  for (const [index, file] of files.entries()) {
+                    const optimized = await optimizeImageFile(file, { maxWidth: 1400, maxHeight: 1000, targetMaxBytes: 300_000, fallbackMaxBytes: 500_000, outputType: "image/webp", qualityStart: 0.86, qualityMin: 0.68 });
+                    const fd = new FormData();
+                    fd.set("propertyId", data?.id ?? "temp");
+                    fd.set("file", optimized.file);
+                    fd.set("path", getPropertyGalleryPath(propertyMeta, index));
+                    const result = await uploadPropertyGalleryImage(fd);
+                    if (!result.ok || !result.path) throw new Error(result.error ?? "Gallery upload failed.");
+                    setGallery((current) => [...current, result.path!].slice(0, 10));
+                  }
+                } catch (error) {
+                  setUploadError(error instanceof Error ? error.message : "Gallery upload failed.");
+                } finally {
+                  setUploading(false);
+                }
+              }} className="mt-1 block w-full rounded-xl border px-3 py-2 text-sm" />
             </label>
 
             {gallery.length > 0 ? (
@@ -651,6 +689,7 @@ export function PropertyForm({
           </div>
         </div>
       </section>
+      {uploadError ? <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{uploadError}</p> : null}
 
       <section className="rounded-2xl border bg-white p-6 shadow-sm">
         <div className="mb-5">
@@ -754,6 +793,7 @@ export function PropertyForm({
       <div className="sticky bottom-0 flex flex-col gap-2 border-t bg-slate-50/95 py-4 backdrop-blur sm:flex-row">
         <button
           type="submit"
+          disabled={uploading}
           disabled={!hasOwners}
           className="rounded-xl bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
