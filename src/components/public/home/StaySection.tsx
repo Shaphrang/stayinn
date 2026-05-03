@@ -110,9 +110,9 @@ function FeaturedMiniCard({ item }: { item: StayItem }) {
   return (
     <Link
       href={getStayHref(item)}
-      className="block w-[40%] min-w-[150px] max-w-[176px] shrink-0 snap-start overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-slate-200/75 active:scale-[0.99]"
+      className="block w-[43%] min-w-[158px] max-w-[182px] shrink-0 snap-start overflow-hidden rounded-[24px] bg-[#fffaf0] shadow-sm ring-1 ring-orange-100/80 active:scale-[0.99]"
     >
-      <div className="relative h-[98px] bg-slate-100">
+      <div className="relative h-[100px] bg-slate-100">
         {stay.image ? (
           <Image
             src={stay.image}
@@ -123,7 +123,7 @@ function FeaturedMiniCard({ item }: { item: StayItem }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full w-full bg-gradient-to-br from-[#d7f7ef] via-[#f8fafc] to-[#ffe7bd]" />
+          <div className="h-full w-full bg-gradient-to-br from-[#d7f7ef] via-[#fff7ed] to-[#ffd7a1]" />
         )}
 
         <div className="absolute inset-x-0 top-0 flex justify-between p-2">
@@ -143,7 +143,7 @@ function FeaturedMiniCard({ item }: { item: StayItem }) {
         </h3>
 
         <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-slate-500">
-          <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+          <MapPin className="h-3 w-3 shrink-0 text-[#0f9f9a]" />
           <span className="truncate">{stay.location}</span>
         </p>
 
@@ -152,7 +152,7 @@ function FeaturedMiniCard({ item }: { item: StayItem }) {
             {formatPrice(stay.price)}
           </span>
 
-          <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-1 text-[9px] font-black text-amber-700">
+          <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-1 text-[9px] font-black text-amber-700">
             <Star className="h-2.5 w-2.5 fill-current" />
             {stay.rating.toFixed(1)}
           </span>
@@ -180,10 +180,10 @@ function WeekendSwipeCard({ item }: { item: StayItem }) {
           className="h-full w-full object-cover"
         />
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(circle_at_18%_20%,#5eead4,transparent_35%),linear-gradient(135deg,#0f9f9a,#0f172a)]" />
+        <div className="h-full w-full bg-[radial-gradient(circle_at_18%_20%,#5eead4,transparent_35%),linear-gradient(135deg,#0f9f9a,#f59e0b,#0f172a)]" />
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/34 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/84 via-slate-950/38 to-transparent" />
 
       <div className="absolute inset-0 flex flex-col justify-between p-3.5">
         <div className="flex items-center justify-between gap-3">
@@ -220,76 +220,94 @@ function WeekendSwipeCard({ item }: { item: StayItem }) {
 function NearbyCard({ item, index }: { item: StayItem; index: number }) {
   const stay = getStayData(item);
 
+  const borderGradient =
+    index % 3 === 0
+      ? "from-[#0f9f9a] via-[#f59e0b] to-[#fb7185]"
+      : index % 3 === 1
+        ? "from-[#6366f1] via-[#14b8a6] to-[#f59e0b]"
+        : "from-[#10b981] via-[#84cc16] to-[#f97316]";
+
+  const surfaceGradient =
+    index % 3 === 0
+      ? "from-[#fff9ec] via-[#f0fdfa] to-[#fff1f2]"
+      : index % 3 === 1
+        ? "from-[#f5f3ff] via-[#ecfeff] to-[#fff7ed]"
+        : "from-[#f0fdf4] via-[#fffbea] to-[#fff7ed]";
+
   return (
     <Link
       href={getStayHref(item)}
-      className="group relative overflow-hidden rounded-[28px] bg-white p-2.5 shadow-sm ring-1 ring-slate-200/75 active:scale-[0.99]"
+      className={[
+        "block rounded-[30px] bg-gradient-to-br p-[1.5px] shadow-[0_14px_34px_rgba(15,23,42,0.08)] active:scale-[0.99]",
+        borderGradient,
+      ].join(" ")}
     >
       <div
         className={[
-          "absolute inset-x-0 top-0 h-20",
-          index % 2 === 0
-            ? "bg-gradient-to-r from-[#e9fbf8] via-white to-[#fff3df]"
-            : "bg-gradient-to-r from-[#eef2ff] via-white to-[#fef2f2]",
+          "relative overflow-hidden rounded-[28px] bg-gradient-to-br p-2.5",
+          surfaceGradient,
         ].join(" ")}
-      />
+      >
+        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/50 blur-2xl" />
+        <div className="absolute -bottom-10 left-16 h-24 w-24 rounded-full bg-white/50 blur-2xl" />
 
-      <div className="relative z-10 flex gap-3">
-        <div className="relative h-[92px] w-[104px] shrink-0 overflow-hidden rounded-[22px] bg-slate-100">
-          {stay.image ? (
-            <Image
-              src={stay.image}
-              alt={stay.title}
-              width={260}
-              height={220}
-              unoptimized
-              className="h-full w-full object-cover transition group-active:scale-105"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-[#d7f7ef] via-[#f8fafc] to-[#ffe7bd]" />
-          )}
+        <div className="relative z-10 flex gap-3">
+          <div className="relative h-[96px] w-[106px] shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-sm">
+            {stay.image ? (
+              <Image
+                src={stay.image}
+                alt={stay.title}
+                width={260}
+                height={220}
+                unoptimized
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-[#d7f7ef] via-[#fff7ed] to-[#ffd7a1]" />
+            )}
 
-          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-slate-800 backdrop-blur">
-            Near
-          </span>
-        </div>
-
-        <div className="min-w-0 flex-1 py-1">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#e9fbf8] px-2 py-1 text-[9px] font-black uppercase tracking-wide text-[#0f9f9a]">
-              <Sparkles className="h-3 w-3" />
-              {stay.type}
-            </span>
-
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[9px] font-black text-amber-700">
-              <Star className="h-2.5 w-2.5 fill-current" />
-              {stay.rating.toFixed(1)}
+            <span className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-slate-800 backdrop-blur">
+              Nearby
             </span>
           </div>
 
-          <h3 className="line-clamp-2 text-[14px] font-black leading-[17px] tracking-tight text-slate-950">
-            {stay.title}
-          </h3>
+          <div className="min-w-0 flex-1 py-1">
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-[#0f766e] ring-1 ring-white/80">
+                <Sparkles className="h-3 w-3" />
+                {stay.type}
+              </span>
 
-          <p className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-slate-500">
-            <Navigation className="h-3.5 w-3.5 shrink-0 text-[#0f9f9a]" />
-            <span className="truncate">{stay.location}</span>
-          </p>
+              <span className="flex shrink-0 items-center gap-1 rounded-full bg-white/72 px-2 py-1 text-[9px] font-black text-amber-700 ring-1 ring-white/80">
+                <Star className="h-2.5 w-2.5 fill-current" />
+                {stay.rating.toFixed(1)}
+              </span>
+            </div>
 
-          <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className="truncate text-[13px] font-black text-slate-950">
-              {formatPrice(stay.price)}
-              {stay.price ? (
-                <span className="text-[10px] font-bold text-slate-400">
-                  {" "}
-                  / night
-                </span>
-              ) : null}
-            </span>
+            <h3 className="line-clamp-2 text-[14px] font-black leading-[17px] tracking-tight text-slate-950">
+              {stay.title}
+            </h3>
 
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-slate-950 text-white">
-              <ArrowRight className="h-3.5 w-3.5" />
-            </span>
+            <p className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-slate-500">
+              <Navigation className="h-3.5 w-3.5 shrink-0 text-[#0f9f9a]" />
+              <span className="truncate">{stay.location}</span>
+            </p>
+
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className="truncate text-[13px] font-black text-slate-950">
+                {formatPrice(stay.price)}
+                {stay.price ? (
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {" "}
+                    / night
+                  </span>
+                ) : null}
+              </span>
+
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white">
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
           </div>
         </div>
       </div>

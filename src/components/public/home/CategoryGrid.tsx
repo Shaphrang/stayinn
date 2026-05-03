@@ -20,12 +20,12 @@ const fallback = [
 ];
 
 const tones = [
-  "from-[#e9fbf8] to-[#d7f7ef] text-[#0f9f9a]",
-  "from-[#fff3df] to-[#ffe2ae] text-[#b86b00]",
-  "from-[#eef2ff] to-[#dde5ff] text-[#4f46e5]",
-  "from-[#fef2f2] to-[#ffe4e6] text-[#e11d48]",
-  "from-[#f0fdf4] to-[#dcfce7] text-[#16a34a]",
-  "from-[#faf5ff] to-[#f3e8ff] text-[#9333ea]",
+  "from-[#0f9f9a] to-[#7dd3fc] text-white shadow-teal-900/20",
+  "from-[#f59e0b] to-[#fb7185] text-white shadow-orange-900/20",
+  "from-[#6366f1] to-[#a855f7] text-white shadow-indigo-900/20",
+  "from-[#10b981] to-[#84cc16] text-white shadow-emerald-900/20",
+  "from-[#ef4444] to-[#f97316] text-white shadow-red-900/20",
+  "from-[#14b8a6] to-[#0f766e] text-white shadow-teal-900/20",
 ];
 
 function CategoryIcon({ label }: { label: string }) {
@@ -56,23 +56,23 @@ export function CategoryGrid({ data }: { data: HomeData }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-3 gap-y-3">
         {cats.slice(0, 6).map((cat, index) => (
           <Link
             key={cat.value}
             href={`/stays?propertyType=${encodeURIComponent(cat.value)}`}
-            className="rounded-[24px] bg-white px-2.5 py-3 text-center shadow-sm ring-1 ring-slate-200/75 active:scale-[0.98]"
+            className="flex flex-col items-center text-center active:scale-[0.97]"
           >
             <div
               className={[
-                "mx-auto mb-2 grid h-12 w-12 place-items-center rounded-[20px] bg-gradient-to-br shadow-inner",
+                "grid h-[54px] w-[54px] place-items-center rounded-[22px] bg-gradient-to-br shadow-lg ring-1 ring-white/45",
                 tones[index % tones.length],
               ].join(" ")}
             >
               <CategoryIcon label={cat.label} />
             </div>
 
-            <p className="line-clamp-2 min-h-[28px] text-[11px] font-black leading-[14px] text-slate-800">
+            <p className="mt-2 line-clamp-2 min-h-[28px] max-w-[92px] text-[11px] font-black leading-[14px] text-slate-800">
               {cat.label}
             </p>
           </Link>

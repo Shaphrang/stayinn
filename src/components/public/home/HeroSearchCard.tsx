@@ -8,8 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
-  Search,
-  SlidersHorizontal,
+  Minus,
+  Plus,
   UsersRound,
   X,
 } from "lucide-react";
@@ -84,10 +84,7 @@ function DatePickerSheet({
 
     const days: Array<Date | null> = [];
 
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-
+    for (let i = 0; i < firstDay; i++) days.push(null);
     for (let day = 1; day <= totalDays; day++) {
       days.push(new Date(year, month, day));
     }
@@ -95,26 +92,14 @@ function DatePickerSheet({
     return days;
   }, [viewDate]);
 
-  const goPrev = () => {
-    setViewDate((current) => {
-      return new Date(current.getFullYear(), current.getMonth() - 1, 1);
-    });
-  };
-
-  const goNext = () => {
-    setViewDate((current) => {
-      return new Date(current.getFullYear(), current.getMonth() + 1, 1);
-    });
-  };
-
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#f5f8f6] px-3 py-2.5 text-left ring-1 ring-slate-200/80 active:scale-[0.98]"
+        className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#fff8ec] px-3 py-2.5 text-left ring-1 ring-orange-100/90 active:scale-[0.98]"
       >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-[#0f9f9a] shadow-sm">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#e9fbf8] to-[#fff2d7] text-[#0f9f9a] shadow-sm">
           <CalendarDays className="h-4 w-4" />
         </span>
 
@@ -130,7 +115,7 @@ function DatePickerSheet({
 
       {open ? (
         <div className="fixed inset-0 z-[100] mx-auto flex max-w-[460px] items-end justify-center bg-slate-950/35 px-3 pb-3 backdrop-blur-sm">
-          <div className="w-full overflow-hidden rounded-[30px] bg-white p-4 shadow-2xl">
+          <div className="w-full overflow-hidden rounded-[30px] bg-[#fffaf1] p-4 shadow-2xl ring-1 ring-white/80">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0f9f9a]">
@@ -144,16 +129,26 @@ function DatePickerSheet({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={goPrev}
-                  className="grid h-9 w-9 place-items-center rounded-2xl bg-slate-100 text-slate-700 active:scale-95"
+                  onClick={() =>
+                    setViewDate(
+                      (current) =>
+                        new Date(current.getFullYear(), current.getMonth() - 1, 1)
+                    )
+                  }
+                  className="grid h-9 w-9 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm ring-1 ring-orange-100 active:scale-95"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={goNext}
-                  className="grid h-9 w-9 place-items-center rounded-2xl bg-slate-100 text-slate-700 active:scale-95"
+                  onClick={() =>
+                    setViewDate(
+                      (current) =>
+                        new Date(current.getFullYear(), current.getMonth() + 1, 1)
+                    )
+                  }
+                  className="grid h-9 w-9 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm ring-1 ring-orange-100 active:scale-95"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -179,9 +174,7 @@ function DatePickerSheet({
               ))}
 
               {calendarDays.map((date, index) => {
-                if (!date) {
-                  return <div key={`empty-${index}`} className="h-10" />;
-                }
+                if (!date) return <div key={`empty-${index}`} className="h-10" />;
 
                 const disabled =
                   minimumDate &&
@@ -202,10 +195,10 @@ function DatePickerSheet({
                     className={[
                       "grid h-10 place-items-center rounded-2xl text-[13px] font-black transition active:scale-95 disabled:opacity-25",
                       selected
-                        ? "bg-[#0f9f9a] text-white shadow-md shadow-teal-900/15"
+                        ? "bg-gradient-to-br from-[#0f9f9a] to-[#08756f] text-white shadow-md shadow-teal-900/15"
                         : today
                           ? "bg-[#e9fbf8] text-[#0f9f9a]"
-                          : "bg-slate-50 text-slate-700",
+                          : "bg-white text-slate-700 ring-1 ring-orange-50",
                     ].join(" ")}
                   >
                     {date.getDate()}
@@ -225,20 +218,18 @@ export function HeroSearchCard() {
 
   const todayIso = toISO(new Date());
 
-  const [where, setWhere] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
+  const [guests, setGuests] = useState(2);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const params = new URLSearchParams();
 
-    if (where.trim()) params.set("where", where.trim());
     if (checkIn) params.set("checkIn", checkIn);
     if (checkOut) params.set("checkOut", checkOut);
-    if (guests) params.set("guests", guests);
+    params.set("guests", String(guests));
 
     router.push(`/stays?${params.toString()}`);
   };
@@ -246,28 +237,24 @@ export function HeroSearchCard() {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-[28px] bg-white p-3 shadow-[0_16px_44px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/80"
+      className="rounded-[30px] bg-[linear-gradient(135deg,#ffffff_0%,#fff7e7_52%,#eefbf8_100%)] p-3 shadow-[0_16px_44px_rgba(15,118,110,0.13)] ring-1 ring-white/80"
     >
-      <div className="flex items-center gap-2 rounded-[22px] bg-[#f5f8f6] px-3 py-2.5 ring-1 ring-slate-200/80">
-        <Search className="h-[18px] w-[18px] shrink-0 text-[#0f9f9a]" />
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#0f9f9a]">
+            Plan your stay
+          </p>
+          <h2 className="mt-0.5 text-[17px] font-black tracking-[-0.03em] text-slate-950">
+            Pick dates & guests
+          </h2>
+        </div>
 
-        <input
-          value={where}
-          onChange={(e) => setWhere(e.target.value)}
-          placeholder="Search location or stay"
-          className="h-8 min-w-0 flex-1 bg-transparent text-[14px] font-bold text-slate-950 outline-none placeholder:text-slate-400"
-        />
-
-        <button
-          type="button"
-          aria-label="Filters"
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 active:scale-95"
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-        </button>
+        <div className="rounded-2xl bg-[#fff1d2] px-3 py-2 text-[11px] font-black text-[#b45309] ring-1 ring-orange-100">
+          Easy booking
+        </div>
       </div>
 
-      <div className="mt-2.5 flex gap-2">
+      <div className="flex gap-2">
         <DatePickerSheet
           label="Check in"
           value={checkIn}
@@ -275,13 +262,11 @@ export function HeroSearchCard() {
           onChange={(value) => {
             setCheckIn(value);
 
-            if (checkOut && fromISO(checkOut) && fromISO(value)) {
-              const out = fromISO(checkOut)!;
-              const inn = fromISO(value)!;
+            const out = fromISO(checkOut);
+            const inn = fromISO(value);
 
-              if (out.getTime() < inn.getTime()) {
-                setCheckOut("");
-              }
+            if (out && inn && out.getTime() < inn.getTime()) {
+              setCheckOut("");
             }
           }}
         />
@@ -295,32 +280,45 @@ export function HeroSearchCard() {
       </div>
 
       <div className="mt-2.5 flex items-center gap-2">
-        <label className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#f5f8f6] px-3 py-2.5 ring-1 ring-slate-200/80">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-[#0f9f9a] shadow-sm">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#fff8ec] px-3 py-2.5 ring-1 ring-orange-100/90">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#e9fbf8] to-[#fff2d7] text-[#0f9f9a] shadow-sm">
             <UsersRound className="h-4 w-4" />
           </span>
 
-          <span className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-black uppercase tracking-wide text-slate-400">
               Guests
             </span>
+            <span className="block text-[13px] font-black text-slate-900">
+              {guests} guest{guests > 1 ? "s" : ""}
+            </span>
+          </div>
 
-            <input
-              type="number"
-              min="1"
-              value={guests}
-              onChange={(e) => setGuests(e.target.value)}
-              className="h-5 w-full bg-transparent text-[13px] font-black text-slate-900 outline-none"
-            />
-          </span>
-        </label>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setGuests((value) => Math.max(1, value - 1))}
+              className="grid h-7 w-7 place-items-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-orange-100 active:scale-95"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGuests((value) => Math.min(20, value + 1))}
+              className="grid h-7 w-7 place-items-center rounded-xl bg-white text-[#0f9f9a] shadow-sm ring-1 ring-orange-100 active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
 
         <button
           type="submit"
-          className="flex h-[58px] min-w-[120px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[#0f9f9a] to-[#08756f] px-4 text-[14px] font-black text-white shadow-lg shadow-teal-900/15 active:scale-[0.98]"
+          className="flex h-[58px] min-w-[112px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[#0f9f9a] via-[#0f766e] to-[#f59e0b] px-4 text-[14px] font-black text-white shadow-lg shadow-teal-900/15 active:scale-[0.98]"
         >
           <MapPin className="h-[17px] w-[17px]" />
-          Search
+          Explore
         </button>
       </div>
     </form>

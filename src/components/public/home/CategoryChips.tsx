@@ -43,8 +43,8 @@ export function CategoryChips({ data }: { data: HomeData }) {
               className={[
                 "shrink-0 rounded-full px-4 py-2 text-[12px] font-black transition active:scale-95",
                 active
-                  ? "bg-slate-950 text-white shadow-sm"
-                  : "bg-white text-slate-700 ring-1 ring-slate-200/80",
+                  ? "bg-gradient-to-r from-[#0f766e] to-[#0f9f9a] text-white shadow-sm shadow-teal-900/15"
+                  : "bg-[#fff3df] text-[#7c4a03] ring-1 ring-orange-100",
               ].join(" ")}
             >
               {cat}

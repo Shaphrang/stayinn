@@ -16,8 +16,8 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
   const nearby = data?.nearbyStays ?? [];
 
   return (
-    <main className="min-h-screen bg-[#f7f8f4] text-slate-950">
-      <div className="mx-auto min-h-screen w-full max-w-[460px] bg-[#f7f8f4] pb-[calc(92px+env(safe-area-inset-bottom))]">
+    <main className="min-h-screen bg-[#f8f5ec] text-slate-950">
+      <div className="mx-auto min-h-screen w-full max-w-[460px] bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.16),transparent_30%),radial-gradient(circle_at_85%_18%,rgba(251,146,60,0.17),transparent_28%),linear-gradient(180deg,#fff9ed_0%,#f7f3ea_44%,#f5f7f2_100%)] pb-[calc(92px+env(safe-area-inset-bottom))]">
         <HomeHeader />
 
         {data ? (
@@ -54,7 +54,7 @@ export function MobileHomePage({ data }: { data: HomeData | null }) {
 
             <StaySection
               title="Nearby stays"
-              subtitle="Stylish stays close to you"
+              subtitle="Colorful stays close to you"
               items={nearby}
               viewAllHref="/stays?nearby=true"
               layout="nearby"
