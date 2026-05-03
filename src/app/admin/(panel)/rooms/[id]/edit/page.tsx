@@ -1,30 +1,32 @@
-//src\app\admin\(panel)\owners\[id]\edit\page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePlatformAdmin } from "@/lib/auth/guards";
 import { supabaseSelectPage } from "@/lib/supabase/server";
-import { OwnerForm } from "../../owner-form";
+import { RoomForm } from "@/components/admin/room-form";
+import { updateRoom } from "../../actions";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-type OwnerStatus = "pending" | "approved" | "rejected" | "suspended";
-
-type OwnerFormData = {
+type RoomFormData = {
   id: string;
-  profile_id: string;
-  business_name: string;
-  contact_person: string | null;
-  phone: string;
-  email: string | null;
-  address: string | null;
-  status: OwnerStatus;
+  property_id: string;
+  name: string;
+  room_type: string;
+  max_guests: number;
+  weekday_rate: number;
+  weekend_rate: number;
+  season_rate: number | null;
+  holiday_rate: number | null;
+  status: string;
 };
 
-type ProfileOption = {
+type PropertyOption = {
   id: string;
-  full_name: string;
-  email: string | null;
-  phone: string | null;
+  name: string;
+  status: string;
+  location_name: string | null;
+  district_name: string | null;
+  state_name: string | null;
 };
 
 function isPostgresUuid(value: string) {
@@ -66,7 +68,7 @@ function MessageBox({
   );
 }
 
-export default async function EditOwnerPage({
+export default async function EditRoomPage({
   params,
   searchParams,
 }: {
@@ -85,16 +87,18 @@ export default async function EditOwnerPage({
   const success = getParam(queryParams, "success");
   const error = getParam(queryParams, "error");
 
-  const ownerResult = await supabaseSelectPage<OwnerFormData>(
-    "v_admin_owners",
+  const roomResult = await supabaseSelectPage<RoomFormData>(
+    "v_admin_rooms",
     [
       "id",
-      "profile_id",
-      "business_name",
-      "contact_person",
-      "phone",
-      "email",
-      "address",
+      "property_id",
+      "name",
+      "room_type",
+      "max_guests",
+      "weekday_rate",
+      "weekend_rate",
+      "season_rate",
+      "holiday_rate",
       "status",
     ].join(","),
     `&id=eq.${id}`,
@@ -104,63 +108,63 @@ export default async function EditOwnerPage({
     },
   );
 
-  const owner = ownerResult.data[0];
+  const room = roomResult.data[0];
 
-  if (!owner) {
+  if (!room) {
     return notFound();
   }
 
-  const profileResult = await supabaseSelectPage<ProfileOption>(
-    "profiles",
-    "id,full_name,email,phone",
-    `&or=(role.eq.owner,id.eq.${owner.profile_id})&order=created_at.desc`,
+  const propertiesResult = await supabaseSelectPage<PropertyOption>(
+    "v_admin_properties",
+    "id,name,status,location_name,district_name,state_name",
+    `&or=(status.eq.active,id.eq.${room.property_id})&order=name.asc`,
     {
       from: 0,
-      to: 499,
+      to: 999,
     },
   );
 
-  const profiles = profileResult.data;
-
-  const hasLinkedProfile = profiles.some(
-    (profile) => profile.id === owner.profile_id,
+  const hasCurrentProperty = propertiesResult.data.some(
+    (property) => property.id === room.property_id,
   );
 
-  const safeProfiles = hasLinkedProfile
-    ? profiles
+  const properties = hasCurrentProperty
+    ? propertiesResult.data
     : [
         {
-          id: owner.profile_id,
-          full_name: "Current linked profile",
-          email: owner.email,
-          phone: owner.phone,
+          id: room.property_id,
+          name: "Current property",
+          status: "active",
+          location_name: null,
+          district_name: null,
+          state_name: null,
         },
-        ...profiles,
+        ...propertiesResult.data,
       ];
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Edit Owner</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Edit Room</h1>
           <p className="text-sm text-slate-500">
-            Update owner profile, business details, and approval status.
+            Update room details, rates, capacity and status.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <Link
-            href={`/admin/owners/${owner.id}`}
+            href={`/admin/rooms/${room.id}`}
             className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
           >
-            View Owner
+            View Room
           </Link>
 
           <Link
-            href="/admin/owners"
+            href="/admin/rooms"
             className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
           >
-            Back to Owners
+            Back to Rooms
           </Link>
         </div>
       </div>
@@ -168,7 +172,7 @@ export default async function EditOwnerPage({
       <MessageBox type="success" message={success} />
       <MessageBox type="error" message={error} />
 
-      <OwnerForm profiles={safeProfiles} owner={owner} />
+      <RoomForm properties={properties} data={room} action={updateRoom} />
     </div>
   );
 }

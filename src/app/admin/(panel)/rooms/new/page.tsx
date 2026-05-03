@@ -1,15 +1,19 @@
+//src\app\admin\(panel)\rooms\new\page.tsx
 import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/auth/guards";
-import { supabaseSelect } from "@/lib/supabase/server";
-import { OwnerForm } from "../owner-form";
+import { supabaseSelectPage } from "@/lib/supabase/server";
+import { RoomForm } from "@/components/admin/room-form";
+import { createRoom } from "../actions";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-type ProfileOption = {
+type PropertyOption = {
   id: string;
-  full_name: string;
-  email: string | null;
-  phone: string | null;
+  name: string;
+  status: string;
+  location_name: string | null;
+  district_name: string | null;
+  state_name: string | null;
 };
 
 function getParam(params: SearchParams, key: string, fallback = "") {
@@ -37,13 +41,15 @@ function MessageBox({
       : "border-rose-200 bg-rose-50 text-rose-700";
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 text-sm font-medium ${className}`}>
+    <div
+      className={`rounded-2xl border px-4 py-3 text-sm font-medium ${className}`}
+    >
       {message}
     </div>
   );
 }
 
-export default async function NewOwnerPage({
+export default async function NewRoomPage({
   searchParams,
 }: {
   searchParams?: Promise<SearchParams>;
@@ -54,34 +60,38 @@ export default async function NewOwnerPage({
   const success = getParam(params, "success");
   const error = getParam(params, "error");
 
-  const profiles = await supabaseSelect<ProfileOption>(
-    "profiles",
-    "id,full_name,email,phone",
-    "&role=eq.owner&is_active=eq.true&order=created_at.desc&limit=500",
+  const properties = await supabaseSelectPage<PropertyOption>(
+    "v_admin_properties",
+    "id,name,status,location_name,district_name,state_name",
+    "&order=name.asc",
+    {
+      from: 0,
+      to: 999,
+    },
   );
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Add Owner</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Create Room</h1>
           <p className="text-sm text-slate-500">
-            Create an owner profile and link it to an active owner account.
+            Add a room/unit under an existing property.
           </p>
         </div>
 
         <Link
-          href="/admin/owners"
-          className="inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+          href="/admin/rooms"
+          className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
         >
-          Back to Owners
+          Back to Rooms
         </Link>
       </div>
 
       <MessageBox type="success" message={success} />
       <MessageBox type="error" message={error} />
 
-      <OwnerForm profiles={profiles} />
+      <RoomForm properties={properties.data} action={createRoom} />
     </div>
   );
 }
