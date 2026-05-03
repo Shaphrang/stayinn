@@ -1,5 +1,4 @@
 //src\components\public\home\HeroSection.tsx
-import Image from "next/image";
 import type { HomeData } from "./types";
 
 function getText(value: unknown, fallback: string) {
@@ -8,45 +7,32 @@ function getText(value: unknown, fallback: string) {
 
 export function HeroSection({ data }: { data: HomeData }) {
   const hero = data.hero as Record<string, unknown>;
-  const heroImage =
-    data.banners[0]?.imageUrl || data.featuredStays[0]?.coverImageUrl;
 
-  const title = getText(hero.title, "Find your perfect stay");
-  const subtitle = getText(
-    hero.subtitle,
-    "Book resorts, homestays, guesthouses and peaceful escapes."
+  const tagline = getText(
+    hero.tagline || hero.subtitle,
+    "Your stay, perfectly curated."
   );
 
   return (
-    <section className="px-4 pt-3">
-      <div className="relative h-[205px] overflow-hidden rounded-[28px] bg-slate-900 shadow-sm">
-        {heroImage ? (
-          <Image
-            src={heroImage}
-            alt="StayInn stays"
-            width={900}
-            height={520}
-            priority
-            unoptimized
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-[radial-gradient(circle_at_20%_20%,#99f6e4,transparent_32%),linear-gradient(135deg,#0f9f9a,#0f766e_48%,#111827)]" />
-        )}
+    <section className="relative overflow-hidden rounded-[28px] bg-[#0b8f8a] px-4 py-4 shadow-sm shadow-teal-900/10">
+      <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/18 blur-2xl" />
+      <div className="absolute -bottom-10 left-10 h-24 w-24 rounded-full bg-[#ffe3a3]/35 blur-2xl" />
+      <div className="absolute right-6 top-6 h-12 w-12 rounded-[1.4rem] border border-white/20 bg-white/10 rotate-12" />
+      <div className="absolute bottom-5 right-24 h-8 w-8 rounded-full border border-white/20 bg-white/10" />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-4">
-          <div className="mb-3 inline-flex rounded-full bg-white/18 px-3 py-1 text-[11px] font-semibold text-white ring-1 ring-white/25 backdrop-blur-md">
-            Native PWA stays experience
-          </div>
-
-          <h1 className="max-w-[280px] text-[28px] font-black leading-[0.98] tracking-[-0.04em] text-white">
-            {title}
-          </h1>
-
-          <p className="mt-2 max-w-[300px] text-[13px] font-medium leading-5 text-white/82">
-            {subtitle}
+      <div className="relative z-10 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/65">
+            StayInn
           </p>
+
+          <h1 className="mt-1 max-w-[250px] text-[22px] font-black leading-[1.05] tracking-[-0.04em] text-white">
+            {tagline}
+          </h1>
+        </div>
+
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[22px] bg-white/16 text-[24px] shadow-inner ring-1 ring-white/20 backdrop-blur">
+          ✦
         </div>
       </div>
     </section>

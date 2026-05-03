@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgePercent } from "lucide-react";
 import type { HomeData } from "./types";
@@ -14,14 +13,14 @@ export function PromoBannerCarousel({ data }: { data: HomeData }) {
     ? data.banners
     : [
         {
-          imageUrl: "",
           title: "Weekend escape",
           subtitle: "Book comfortable stays around Shillong.",
+          href: "/stays",
         },
         {
-          imageUrl: "",
           title: "Featured deals",
           subtitle: "Discover handpicked homestays and resorts.",
+          href: "/stays?featured=true",
         },
       ];
 
@@ -32,7 +31,7 @@ export function PromoBannerCarousel({ data }: { data: HomeData }) {
           Offers for you
         </h2>
 
-        <Link href="/stays" className="text-[12px] font-bold text-[#0f9f9a]">
+        <Link href="/stays" className="text-[12px] font-black text-[#0f9f9a]">
           See all
         </Link>
       </div>
@@ -46,41 +45,33 @@ export function PromoBannerCarousel({ data }: { data: HomeData }) {
             "Find places that match your travel mood."
           );
           const href = readString(banner, "href", "/stays");
-          const imageUrl = readString(banner, "imageUrl", "");
 
           return (
             <Link
               key={`${title}-${index}`}
               href={href}
-              className="relative h-[118px] w-[82%] max-w-[340px] shrink-0 snap-start overflow-hidden rounded-[26px] bg-slate-900 shadow-sm active:scale-[0.99]"
+              className={[
+                "relative h-[104px] w-[78%] max-w-[330px] shrink-0 snap-start overflow-hidden rounded-[26px] p-4 shadow-sm active:scale-[0.99]",
+                index % 2 === 0
+                  ? "bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.28),transparent_32%),linear-gradient(135deg,#0f9f9a,#0f766e,#0f172a)]"
+                  : "bg-[radial-gradient(circle_at_18%_25%,rgba(255,255,255,0.28),transparent_30%),linear-gradient(135deg,#f59e0b,#c2410c,#111827)]",
+              ].join(" ")}
             >
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  alt={title}
-                  width={700}
-                  height={320}
-                  unoptimized
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full bg-[radial-gradient(circle_at_20%_20%,#5eead4,transparent_34%),linear-gradient(135deg,#0f9f9a,#0f172a)]" />
-              )}
+              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15 blur-xl" />
+              <div className="absolute -bottom-8 left-16 h-20 w-20 rounded-full bg-white/10 blur-xl" />
 
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/40 to-transparent" />
-
-              <div className="absolute inset-0 flex flex-col justify-between p-4">
+              <div className="relative z-10 flex h-full flex-col justify-between">
                 <div>
                   <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/16 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
                     <BadgePercent className="h-3.5 w-3.5" />
                     Promo
                   </div>
 
-                  <h3 className="max-w-[210px] text-[18px] font-black leading-5 tracking-tight text-white">
+                  <h3 className="max-w-[210px] text-[17px] font-black leading-5 tracking-tight text-white">
                     {title}
                   </h3>
 
-                  <p className="mt-1 max-w-[220px] text-[11px] font-medium leading-4 text-white/75">
+                  <p className="mt-1 max-w-[230px] text-[11px] font-semibold leading-4 text-white/75">
                     {subtitle}
                   </p>
                 </div>

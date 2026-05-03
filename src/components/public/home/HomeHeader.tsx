@@ -4,18 +4,18 @@ import { Bell, MapPin, Menu } from "lucide-react";
 
 export function HomeHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/70 bg-[#f6f7f5]/90 px-4 pb-3 pt-[calc(14px+env(safe-area-inset-top))] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/70 bg-[#f7f8f4]/92 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="flex min-w-0 items-center gap-2">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#0f9f9a] text-sm font-black text-white shadow-sm shadow-teal-900/10">
+        <Link href="/" className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#0f9f9a] to-[#08756f] text-sm font-black text-white shadow-sm shadow-teal-900/15">
             S
           </span>
 
           <span className="min-w-0">
-            <span className="block text-[18px] font-extrabold leading-none tracking-tight text-slate-950">
+            <span className="block text-[18px] font-black leading-none tracking-[-0.03em] text-slate-950">
               StayInn
             </span>
-            <span className="mt-1 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+            <span className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-slate-500">
               <MapPin className="h-3 w-3 text-[#0f9f9a]" />
               Shillong, Meghalaya
             </span>
@@ -26,7 +26,7 @@ export function HomeHeader() {
           <button
             type="button"
             aria-label="Notifications"
-            className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/70 active:scale-95"
+            className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 active:scale-95"
           >
             <Bell className="h-[18px] w-[18px]" />
           </button>

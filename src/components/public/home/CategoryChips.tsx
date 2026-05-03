@@ -23,10 +23,7 @@ export function CategoryChips({ data }: { data: HomeData }) {
           Quick filters
         </h2>
 
-        <Link
-          href="/stays"
-          className="text-[12px] font-bold text-[#0f9f9a]"
-        >
+        <Link href="/stays" className="text-[12px] font-black text-[#0f9f9a]">
           View all
         </Link>
       </div>
@@ -44,10 +41,10 @@ export function CategoryChips({ data }: { data: HomeData }) {
                   : `/stays?propertyType=${encodeURIComponent(cat)}`
               }
               className={[
-                "shrink-0 rounded-full px-4 py-2 text-[12px] font-extrabold transition active:scale-95",
+                "shrink-0 rounded-full px-4 py-2 text-[12px] font-black transition active:scale-95",
                 active
                   ? "bg-slate-950 text-white shadow-sm"
-                  : "bg-white text-slate-700 ring-1 ring-slate-200",
+                  : "bg-white text-slate-700 ring-1 ring-slate-200/80",
               ].join(" ")}
             >
               {cat}
