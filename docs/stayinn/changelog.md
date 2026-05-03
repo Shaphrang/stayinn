@@ -152,3 +152,27 @@
 ### Next recommended steps
 - Add optional safe storage-object cleanup worker for unreferenced media paths.
 - Add consistent media widgets usage across any future admin forms containing `image_path` fields.
+
+## 2026-05-03 (property image upload payload and path fix)
+
+### Files modified
+- `src/app/admin/(panel)/properties/actions.ts`
+- `docs/stayinn/changelog.md`
+
+### Features added
+- Refactored property create/update payload mapping to explicit editable-field whitelist so normal property updates no longer send platform-controlled columns.
+- Kept platform-controlled property writes (`status`, featured/verified flags, admin notes) in dedicated admin-only actions.
+- Fixed upload actions that used `path` before initialization by renaming request/input and upload-result variables to explicit storage-path names.
+- Preserved image DB behavior so `cover_image` and `gallery_images` continue storing storage paths only.
+
+### Known limitations
+- End-to-end browser upload flow and `/api/v1/public/home` runtime verification were not executed in this headless environment.
+- Build still fails in this environment due to Google Fonts fetch failures from `next/font` network access.
+
+### Testing steps
+- Run `npm run lint`.
+- Run `npm run build`.
+
+### Next recommended steps
+- Run manual admin property image upload/edit checks in browser against a live Supabase-backed environment.
+- Add lightweight integration test coverage for upload action payload shape and public mapper URL conversion.
