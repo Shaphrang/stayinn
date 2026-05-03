@@ -14,8 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StayInn Admin",
-  description: "StayInn accommodation platform admin panel",
+  title: "StayInn",
+  description: "Accommodation marketplace for curated stays",
+  appleWebApp: {
+    capable: true,
+    title: "StayInn",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({

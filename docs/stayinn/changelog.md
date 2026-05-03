@@ -74,3 +74,48 @@
 - Wire these services directly into the PWA homepage/listing UI.
 - Add RPC-backed real availability search when booking-availability rules are finalized.
 - Add rate-limiting and abuse controls on `POST /api/v1/public/events`.
+
+## 2026-05-03 (PWA homepage UI)
+
+### Files created
+- `src/app/manifest.ts`
+- `src/components/public/home/types.ts`
+- `src/components/public/home/MobileHomePage.tsx`
+- `src/components/public/home/HomeHeader.tsx`
+- `src/components/public/home/HeroSection.tsx`
+- `src/components/public/home/HeroSearchCard.tsx`
+- `src/components/public/home/CategoryChips.tsx`
+- `src/components/public/home/CategoryGrid.tsx`
+- `src/components/public/home/PromoBannerCarousel.tsx`
+- `src/components/public/home/StaySection.tsx`
+- `src/components/public/home/StayCard.tsx`
+- `src/components/public/home/CompactStayCard.tsx`
+- `src/components/public/home/BottomNav.tsx`
+- `src/components/public/home/HomeEmptyState.tsx`
+- `public/icons/icon-192.svg`
+- `public/icons/icon-512.svg`
+
+### Files modified
+- `src/app/page.tsx`
+- `src/app/layout.tsx`
+- `docs/stayinn/changelog.md`
+
+### Features added
+- Replaced placeholder root page with mobile-first PWA homepage shell that uses `getPublicHomeData()` directly.
+- Added hero, floating search card, category chips/grid, promo banners, featured/weekend/nearby horizontal stay sections, and fixed bottom navigation.
+- Added graceful fallback empty state and per-section fallback data handling when arrays are empty.
+- Added web app manifest and basic standalone/mobile metadata with safe-area-friendly bottom navigation layout.
+
+### Known limitations
+- Analytics event tracking for homepage interactions is intentionally not wired in this pass.
+- PWA icons are SVG placeholders; dedicated branded PNG icons can be added later.
+- `/stays` and other bottom-nav destination pages may not exist yet; links are prepared for upcoming tasks.
+
+### Testing steps
+- Run `npm run lint`.
+- Run `npm run build`.
+
+### Next recommended steps
+- Add lightweight client-side event tracking via existing public events service.
+- Improve category artwork and property image source curation for production polish.
+- Implement `/stays` listing page to complete link flow from homepage search/chips/sections.
